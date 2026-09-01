@@ -18,6 +18,7 @@ router.post('/login', authLimiter, logActivity('user_login'), authController.log
 router.get('/challenge', authController.getWalletChallenge);
 router.post('/bind-wallet', protect, logActivity('wallet_binding'), authController.bindWallet);
 router.post('/login-wallet', authLimiter, logActivity('wallet_login'), authController.loginWithWallet);
+router.post('/login-face', authLimiter, logActivity('user_face_login'), authController.loginWithFace);
 router.post('/demo-switch', authController.demoPersonaLogin);
 
 module.exports = router;

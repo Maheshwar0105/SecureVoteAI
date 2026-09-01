@@ -4,6 +4,7 @@ import { useWeb3 } from '../context/Web3Context';
 import api from '../services/api';
 import HolographicIdBadge from '../components/HolographicIdBadge';
 import DemoSwitcherModal from '../components/DemoSwitcherModal';
+import VotingSelectionModal from '../components/VotingSelectionModal';
 import {
   Wallet,
   Calendar,
@@ -43,9 +44,17 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
   const [error, setError] = useState<string | null>(null);
   const [bindSuccess, setBindSuccess] = useState<string | null>(null);
   const [showDemoModal, setShowDemoModal] = useState(false);
+  const [showVotingSelectionModal, setShowVotingSelectionModal] = useState(false);
 
   useEffect(() => {
     fetchDashboardData(selectedFilter);
+
+    // Check if user just logged in and trigger post-login election selection modal automatically
+    const justLoggedIn = sessionStorage.getItem('justLoggedIn');
+    if (justLoggedIn) {
+      setShowVotingSelectionModal(true);
+      sessionStorage.removeItem('justLoggedIn');
+    }
   }, [selectedFilter]);
 
   const fetchDashboardData = async (filterType: string) => {
@@ -94,7 +103,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
   };
 
   return (
-    <div className="flex-1 bg-slate-950 text-slate-100 py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8">
+    <div className="flex-1 bg-slate-950 text-slate-100 py-8 px-4 sm:px-6 lg:px-12 w-full max-w-full space-y-8">
       
       {/* Top Banner Artwork & Dashboard Headline */}
       <div className="relative rounded-3xl overflow-hidden border border-slate-800 bg-slate-900/90 shadow-2xl backdrop-blur-xl p-6 sm:p-8">
@@ -114,12 +123,20 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => setShowVotingSelectionModal(true)}
+              className="bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl transition cursor-pointer flex items-center gap-2 shadow-lg shadow-cyan-500/20 active:scale-95 border border-cyan-400/30"
+            >
+              <Vote className="h-4 w-4" />
+              <span>🎯 Select What & When To Vote</span>
+            </button>
+
             <button
               onClick={() => setShowDemoModal(true)}
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition cursor-pointer flex items-center gap-2 shadow-lg shadow-purple-500/20 active:scale-95"
+              className="bg-slate-900 border border-slate-750 hover:bg-slate-850 text-slate-300 text-xs font-bold px-4 py-2.5 rounded-xl transition cursor-pointer flex items-center gap-2 active:scale-95"
             >
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="h-4 w-4 text-purple-400" />
               <span>Switch Presentation Persona</span>
             </button>
           </div>
@@ -374,6 +391,19 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
         onSelectPersona={(updatedUser) => {
           onUserUpdate(updatedUser);
           window.location.reload();
+        }}
+      />
+
+      <VotingSelectionModal
+        isOpen={showVotingSelectionModal}
+        onClose={() => setShowVotingSelectionModal(false)}
+        elections={elections}
+        onSelectSelection={(domain, timing, electionId) => {
+          if (domain === 'civic') {
+            setSelectedFilter('general');
+          } else {
+            setSelectedFilter(domain as any);
+          }
         }}
       />
     </div>

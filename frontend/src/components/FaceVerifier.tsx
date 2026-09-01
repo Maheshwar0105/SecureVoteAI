@@ -1,18 +1,33 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Camera, ShieldCheck, RefreshCw, XCircle, UserCheck, Play } from 'lucide-react';
 
+const getFaceEmbeddingForEmail = (email: string): number[] => {
+  const embedding = [];
+  let seed = 0;
+  for (let i = 0; i < email.length; i++) {
+    seed += email.charCodeAt(i);
+  }
+  for (let i = 0; i < 128; i++) {
+    const x = Math.sin(seed + i) * 10000;
+    embedding.push((x - Math.floor(x)) * 2 - 1);
+  }
+  return embedding;
+};
+
 interface FaceVerifierProps {
   onVerificationSuccess: (faceEmbedding: number[]) => void;
   onClose: () => void;
   actionText?: string;
   expectedEmbedding?: number[]; // If provided, matches against this instead of generating new
+  email?: string; // Optional email to generate deterministic face signature
 }
 
 export const FaceVerifier: React.FC<FaceVerifierProps> = ({
   onVerificationSuccess,
   onClose,
   actionText = 'Verify Identity',
-  expectedEmbedding
+  expectedEmbedding,
+  email
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -22,6 +37,7 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
   const [isSimulated, setIsSimulated] = useState(false);
   const [instruction, setInstruction] = useState('Position your face in the center of the scanner');
   const [progress, setProgress] = useState(0);
+  const [shouldMismatch, setShouldMismatch] = useState(false);
 
   useEffect(() => {
     startCamera();
@@ -91,7 +107,21 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
 
   const verifyFaceSignature = () => {
     // Generate simulated face descriptor embedding (array of 128 float values)
-    const simulatedEmbedding = Array.from({ length: 128 }, () => Math.random() * 2 - 1);
+    let simulatedEmbedding: number[];
+
+    if (shouldMismatch) {
+      // Generate a completely random vector which won't match (orthogonal in high-dimensional space)
+      simulatedEmbedding = Array.from({ length: 128 }, () => Math.random() * 2 - 1);
+    } else {
+      // Generate a deterministic matching vector based on email if expectedEmbedding isn't provided
+      if (expectedEmbedding) {
+        simulatedEmbedding = [...expectedEmbedding];
+      } else if (email) {
+        simulatedEmbedding = getFaceEmbeddingForEmail(email);
+      } else {
+        simulatedEmbedding = Array.from({ length: 128 }, () => Math.random() * 2 - 1);
+      }
+    }
 
     if (expectedEmbedding) {
       // Calculate Cosine Similarity to simulate deep-learning matching
@@ -100,19 +130,18 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
       const mag2 = Math.sqrt(expectedEmbedding.reduce((sum, val) => sum + val * val, 0));
       const similarity = dotProduct / (mag1 * mag2);
 
-      // Simulate a successful match
-      const matchSuccess = Math.random() > 0.15; // 85% success rate for correct voter
-      
-      if (matchSuccess) {
+      const isMatch = similarity > 0.85;
+
+      if (isMatch) {
         setStatus('success');
-        setInstruction('Biometric identification match found! (98.4% confidence)');
+        setInstruction(`Biometric identification match found! (${(similarity * 100).toFixed(1)}% confidence)`);
         setTimeout(() => {
           stopCamera();
-          onVerificationSuccess(expectedEmbedding);
+          onVerificationSuccess(simulatedEmbedding);
         }, 1500);
       } else {
         setStatus('failed');
-        setInstruction('Face matching failed. Biometric signature mismatch.');
+        setInstruction(`Face matching failed. Biometric signature mismatch (${(similarity * 100).toFixed(1)}% confidence).`);
       }
     } else {
       // Registration flow (save newly generated embedding)
@@ -207,6 +236,17 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
               <p className="text-xs text-emerald-400 font-bold">{instruction}</p>
             </div>
           )}
+        </div>
+
+        {/* Mismatch simulation toggle */}
+        <div className="mt-4 flex items-center justify-between bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl text-xs">
+          <span className="text-slate-400 font-medium">Simulate Unregistered Face (Biometric Mismatch)</span>
+          <input
+            type="checkbox"
+            checked={shouldMismatch}
+            onChange={(e) => setShouldMismatch(e.target.checked)}
+            className="accent-purple-600 h-4.5 w-4.5 rounded border-slate-800 bg-slate-950 cursor-pointer"
+          />
         </div>
 
         {/* Status indicator bar */}

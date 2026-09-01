@@ -110,7 +110,7 @@ export const DemoSwitcherModal: React.FC<DemoSwitcherModalProps> = ({
               <Sparkles className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-xl font-extrabold text-white">Live Presentation Persona Switcher</h2>
+              <h2 className="text-xl font-bold tracking-tight text-white">Live Presentation Persona Switcher</h2>
               <p className="text-xs text-slate-400 mt-0.5">
                 Switch instantly between College, Corporate, School, Civic, and Admin roles.
               </p>
@@ -142,7 +142,7 @@ export const DemoSwitcherModal: React.FC<DemoSwitcherModalProps> = ({
                   </div>
                   <div>
                     <div className="flex items-center gap-2 mb-0.5">
-                      <h4 className="font-extrabold text-white text-sm group-hover:text-purple-300 transition">
+                      <h4 className="font-bold text-white text-sm group-hover:text-purple-300 transition tracking-tight">
                         {persona.title}
                       </h4>
                       <span className="text-[9px] font-mono font-bold bg-slate-900 border border-slate-700 text-slate-300 px-2 py-0.5 rounded-full">

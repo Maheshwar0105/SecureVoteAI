@@ -161,25 +161,41 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="flex-1 bg-slate-950 text-slate-100 flex flex-col justify-start bg-grid relative overflow-hidden" dir="ltr">
-      
-      {/* Hero Section with 3D Holographic Canvas */}
-      <section className="relative py-12 lg:py-20 px-4 sm:px-6 lg:px-12 w-full max-w-7xl mx-auto overflow-hidden">
+
+      {/* Hero Section with 3D Holographic Canvas & AI-Blockchain Background */}
+      <section className="relative pt-6 pb-12 lg:pt-8 lg:pb-16 px-4 sm:px-6 lg:px-8 w-full max-w-[1400px] mx-auto overflow-hidden">
+        {/* Background Artwork Layer with high-tech glow & gradient overlays */}
+        <div className="absolute inset-0 -z-10 rounded-3xl overflow-hidden opacity-35 pointer-events-none">
+          <img 
+            src="/securevote_hero_bg.png" 
+            alt="SecureVote AI Background" 
+            className="w-full h-full object-cover object-center scale-105 filter contrast-125 brightness-90"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/80" />
+        </div>
+
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-purple-600/20 via-indigo-600/15 to-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center">
           {/* Left Column: Headline & CTA */}
-          <div className="lg:col-span-6 text-left space-y-6 animate-fade-in">
+          <div className="lg:col-span-7 text-left space-y-5 animate-fade-in">
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-950/80 to-indigo-950/80 border border-purple-500/30 px-4 py-1.5 rounded-full text-xs font-mono text-purple-300 shadow-inner">
               <Sparkles className="h-4 w-4 text-purple-400 animate-spin" />
               <span>NEXT-GEN AI & BLOCKCHAIN VOTING INFRASTRUCTURE</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-white">
-              Democracy Engineered for{' '}
-              <span className="bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-                Colleges, Companies & Nations
-              </span>
-            </h1>
+            <div>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.15]">
+                The Future of{' '}
+                <span className="bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+                  Secure Voting
+                </span>
+              </h1>
+              <p className="text-base sm:text-lg lg:text-xl font-bold bg-gradient-to-r from-cyan-300 via-indigo-200 to-purple-300 bg-clip-text text-transparent mt-2.5 tracking-tight">
+                Built with AI. Secured by Blockchain.
+              </p>
+            </div>
 
             <p className="text-base text-slate-300 leading-relaxed max-w-xl">
               One unified platform for <strong className="text-cyan-300">College Student Councils</strong>, <strong className="text-emerald-300">Corporate Workplace & Food Depts</strong>, <strong className="text-amber-300">School Prefects</strong>, and <strong className="text-purple-300">Civic Elections</strong>—powered by Ethereum smart contracts, real-time AI anomaly detection, and biometric face verification.
@@ -214,9 +230,9 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Right Column: 3D Holographic Interactive Canvas */}
-          <div className="lg:col-span-6 relative">
+          <div className="lg:col-span-5 relative">
             <div className="relative bg-gradient-to-b from-slate-900/80 via-slate-950/90 to-slate-900/80 border border-slate-800/80 rounded-3xl p-3 shadow-2xl backdrop-blur-xl overflow-hidden min-h-[420px] flex flex-col justify-between">
-              
+
               {/* Interactive 3D Node Mesh */}
               <Futuristic3DCanvas />
 
@@ -276,11 +292,10 @@ export const LandingPage: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveDomainTab(tab.id as any)}
-                className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                  isActive
+                className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${isActive
                     ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/20 scale-105 border border-purple-400/30'
                     : 'bg-slate-900/80 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-850'
-                }`}
+                  }`}
               >
                 <Icon className="h-4 w-4" />
                 <span>{tab.label}</span>

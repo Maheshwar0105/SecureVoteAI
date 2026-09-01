@@ -49,6 +49,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
+      sessionStorage.setItem('justLoggedIn', 'true');
       
       onLoginSuccess(user);
       
@@ -58,7 +59,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed. Please check credentials.');
+      if (err.code === 'ERR_NETWORK' || !err.response) {
+        setError('Network Error: Unable to reach backend. Check VITE_API_URL in Netlify or wait ~50s for Render free-tier cold start.');
+      } else {
+        setError(err.response?.data?.error || 'Login failed. Please check credentials or register a new account.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -93,6 +98,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
+      sessionStorage.setItem('justLoggedIn', 'true');
       
       onLoginSuccess(user);
 
@@ -109,47 +115,59 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   };
 
   const handleBiometricFaceLogin = () => {
+    if (!email) {
+      setError('Please enter your Official Email / ID first so we can verify your face signature.');
+      return;
+    }
+    setError(null);
     setShowFaceScan(true);
   };
 
-  const handleFaceSuccess = async () => {
+  const handleFaceSuccess = async (faceEmbedding: number[]) => {
     setShowFaceScan(false);
     setIsLoading(true);
+    setError(null);
     try {
-      const res = await api.post('/auth/demo-switch', { persona: 'college' });
+      const res = await api.post('/auth/login-face', { email, faceEmbedding });
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
+      sessionStorage.setItem('justLoggedIn', 'true');
       onLoginSuccess(res.data.user);
-      navigate('/dashboard');
+      
+      if (res.data.user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err: any) {
-      setError('Biometric authentication succeeded, failed to load session.');
+      setError(err.response?.data?.error || 'Biometric authentication failed. Signature mismatch.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex-1 bg-slate-950 text-slate-100 flex flex-col items-center justify-start py-8 px-4 sm:px-6 lg:px-8 bg-grid relative overflow-hidden">
+    <div className="flex-1 bg-slate-950 text-slate-100 flex flex-col items-center justify-start py-4 sm:py-6 px-4 sm:px-6 lg:px-12 bg-grid relative overflow-hidden min-h-[calc(100vh-4rem)]">
       {/* Background glow aura */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-purple-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
 
       {/* Mission Control Top Header */}
-      <div className="w-full max-w-6xl mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/80 border border-slate-800 p-4 sm:p-6 rounded-3xl backdrop-blur-xl shadow-xl">
+      <div className="w-full max-w-full mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-900/80 border border-slate-800 px-5 py-3.5 sm:px-6 sm:py-4 rounded-2xl backdrop-blur-xl shadow-xl">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
-            <p className="text-xs font-mono font-bold tracking-widest text-cyan-400 uppercase">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+            <p className="text-[11px] font-mono font-bold tracking-widest text-cyan-400 uppercase">
               SECURE VOTING AI // MISSION CONTROL PORTAL
             </p>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
             FINAL, VERIFIED RESULTS: <span className="bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">TOTAL INTEGRITY</span>
           </h1>
         </div>
 
         <button
           onClick={() => setShowDemoModal(true)}
-          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition cursor-pointer flex items-center gap-2 shadow-lg shadow-purple-500/20 active:scale-95"
+          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition cursor-pointer flex items-center gap-2 shadow-lg shadow-purple-500/20 active:scale-95 shrink-0"
         >
           <Sparkles className="h-4 w-4" />
           <span>Quick Viva Persona Switcher</span>
@@ -157,71 +175,71 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       </div>
 
       {/* Main Dual Grid: Command Center Art Showcase + Auth Interface */}
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="w-full max-w-full grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
         
         {/* Left Column: Command Center Artwork with Interactive Hotspots */}
-        <div className="lg:col-span-7 space-y-5">
-          <div className="relative rounded-3xl overflow-hidden border border-slate-800 bg-slate-950 shadow-2xl group">
+        <div className="lg:col-span-7 flex flex-col justify-between space-y-4">
+          <div className="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 shadow-2xl group flex-1 max-h-[380px] xl:max-h-[420px] flex items-center justify-center">
             <img 
               src="/secure_voting_command.png" 
               alt="Secure Voting AI Command Center" 
-              className="w-full h-auto object-cover rounded-3xl transition duration-500 group-hover:scale-101"
+              className="w-full h-full object-cover object-center rounded-2xl transition duration-500 group-hover:scale-102"
             />
             
             {/* Holographic Top Banner Overlay */}
-            <div className="absolute top-4 left-4 right-4 flex justify-between items-center bg-slate-950/85 border border-cyan-500/40 px-4 py-2 rounded-2xl backdrop-blur-md shadow-lg text-xs font-mono">
+            <div className="absolute top-3 left-3 right-3 flex justify-between items-center bg-slate-950/85 border border-cyan-500/40 px-3.5 py-1.5 rounded-xl backdrop-blur-md shadow-lg text-[11px] font-mono">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-cyan-400" />
-                <span className="text-white font-extrabold uppercase">SECURE VOTING AI COMMAND</span>
+                <ShieldCheck className="h-3.5 w-3.5 text-cyan-400" />
+                <span className="text-white font-extrabold uppercase tracking-wide">SECURE VOTING AI COMMAND</span>
               </div>
-              <span className="text-emerald-400 font-bold">● TOTAL INTEGRITY ACTIVE</span>
+              <span className="text-emerald-400 font-bold text-[10px]">● TOTAL INTEGRITY ACTIVE</span>
             </div>
 
             {/* Bottom Telemetry Ticker */}
-            <div className="absolute bottom-4 left-4 right-4 bg-slate-950/90 border border-slate-800 p-3 rounded-2xl backdrop-blur-md flex flex-wrap justify-between items-center gap-2 text-[11px] font-mono text-slate-300">
+            <div className="absolute bottom-3 left-3 right-3 bg-slate-950/90 border border-slate-800 px-3 py-2 rounded-xl backdrop-blur-md flex flex-wrap justify-between items-center gap-2 text-[10px] font-mono text-slate-300">
               <span className="text-cyan-300 flex items-center gap-1">
-                <Globe className="h-3.5 w-3.5 text-cyan-400" /> Global Multi-Biometric Identity Minting
+                <Globe className="h-3 w-3 text-cyan-400" /> Global Multi-Biometric Identity Minting
               </span>
               <span className="text-purple-300">Ledger: Sepolia Ethereum Testnet</span>
             </div>
           </div>
 
           {/* Interactive Pillars Grid from Command Center */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="p-3.5 bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 rounded-2xl transition cursor-pointer">
-              <div className="flex items-center gap-2 text-cyan-400 mb-1">
-                <Fingerprint className="h-4 w-4" />
-                <h4 className="text-xs font-bold">Biometric Minting</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div className="p-3 bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 rounded-xl transition cursor-pointer">
+              <div className="flex items-center gap-1.5 text-cyan-400 mb-0.5">
+                <Fingerprint className="h-3.5 w-3.5 shrink-0" />
+                <h4 className="text-xs font-bold truncate">Biometric Minting</h4>
               </div>
-              <p className="text-[10px] text-slate-400 leading-tight">128-d face descriptors with anti-spoof liveness verify voter identity.</p>
+              <p className="text-[10px] text-slate-400 leading-snug">128-d face descriptors with anti-spoof liveness verify voter identity.</p>
             </div>
 
-            <div className="p-3.5 bg-slate-900/80 border border-slate-800 hover:border-purple-500/50 rounded-2xl transition cursor-pointer">
-              <div className="flex items-center gap-2 text-purple-400 mb-1">
-                <ShieldAlert className="h-4 w-4" />
-                <h4 className="text-xs font-bold">AI Threat Shield</h4>
+            <div className="p-3 bg-slate-900/80 border border-slate-800 hover:border-purple-500/50 rounded-xl transition cursor-pointer">
+              <div className="flex items-center gap-1.5 text-purple-400 mb-0.5">
+                <ShieldAlert className="h-3.5 w-3.5 shrink-0" />
+                <h4 className="text-xs font-bold truncate">AI Threat Shield</h4>
               </div>
-              <p className="text-[10px] text-slate-400 leading-tight">Isolation Forest evaluates timing intervals & bot script cadence in real-time.</p>
+              <p className="text-[10px] text-slate-400 leading-snug">Isolation Forest evaluates timing intervals & bot script cadence in real-time.</p>
             </div>
 
-            <div className="p-3.5 bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 rounded-2xl transition cursor-pointer">
-              <div className="flex items-center gap-2 text-emerald-400 mb-1">
-                <Database className="h-4 w-4" />
-                <h4 className="text-xs font-bold">Ledger Finality</h4>
+            <div className="p-3 bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 rounded-xl transition cursor-pointer">
+              <div className="flex items-center gap-1.5 text-emerald-400 mb-0.5">
+                <Database className="h-3.5 w-3.5 shrink-0" />
+                <h4 className="text-xs font-bold truncate">Ledger Finality</h4>
               </div>
-              <p className="text-[10px] text-slate-400 leading-tight">Zero-trust immutable ballots recorded to smart contracts without admins.</p>
+              <p className="text-[10px] text-slate-400 leading-snug">Zero-trust immutable ballots recorded to smart contracts without admins.</p>
             </div>
           </div>
         </div>
 
         {/* Right Column: Authentication Card */}
-        <div className="lg:col-span-5 bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
-          <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-1.5 bg-purple-950/70 border border-purple-500/30 px-3 py-1 rounded-full text-[10px] font-mono text-purple-300">
-              <Radio className="h-3.5 w-3.5 text-purple-400 animate-pulse" />
+        <div className="lg:col-span-5 bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-2xl backdrop-blur-xl flex flex-col justify-between space-y-4">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 bg-purple-950/70 border border-purple-500/30 px-2.5 py-0.5 rounded-full text-[10px] font-mono text-purple-300">
+              <Radio className="h-3 w-3 text-purple-400 animate-pulse" />
               <span>VOTER AUTHENTICATION GATEWAY</span>
             </div>
-            <h2 className="text-2xl font-extrabold text-white">Voter Sign In</h2>
+            <h2 className="text-xl font-extrabold text-white">Voter Sign In</h2>
             <p className="text-slate-400 text-xs">
               Access your college, corporate, school, or civic voting ballot.
             </p>
@@ -327,6 +345,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
       {showFaceScan && (
         <FaceVerifier
+          email={email}
           onVerificationSuccess={handleFaceSuccess}
           onClose={() => setShowFaceScan(false)}
           actionText="Verify Identity"

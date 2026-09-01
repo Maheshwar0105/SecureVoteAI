@@ -113,7 +113,7 @@ export const Results: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 bg-slate-950 text-slate-100 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+    <div className="flex-1 bg-slate-950 text-slate-100 py-12 px-4 sm:px-6 lg:px-12 w-full max-w-full">
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
         <div>
           <h2 className="text-2xl font-bold text-white">Live Election Results</h2>

@@ -117,7 +117,7 @@ export const HolographicIdBadge: React.FC<HolographicIdBadgeProps> = ({ user }) 
           transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
           transition: 'transform 0.15s ease-out'
         }}
-        className={`relative w-full max-w-md bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-slate-700/80 rounded-3xl p-6 shadow-2xl transition-shadow duration-300 overflow-hidden cursor-pointer ${currentTheme.borderGlow}`}
+        className={`relative w-full max-w-md bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-slate-700/80 rounded-3xl p-6 sm:p-7 shadow-2xl transition-shadow duration-300 overflow-hidden cursor-pointer ${currentTheme.borderGlow}`}
       >
         {/* Holographic dynamic rainbow sheen overlay */}
         <div
@@ -136,22 +136,22 @@ export const HolographicIdBadge: React.FC<HolographicIdBadgeProps> = ({ user }) 
         />
 
         {/* Card Header */}
-        <div className="relative z-10 flex justify-between items-start mb-6">
+        <div className="relative z-10 flex justify-between items-start mb-6 gap-2">
           <div className="flex items-center gap-2.5">
             <div className={`p-2 rounded-xl bg-gradient-to-br ${currentTheme.accent} text-white shadow-lg shadow-purple-500/20`}>
-              <DomainIcon className="h-5 w-5" />
+              <DomainIcon className="h-5.5 w-5.5" />
             </div>
             <div>
-              <p className="text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">
+              <p className="text-xs font-mono font-bold tracking-widest text-slate-400 uppercase">
                 {currentTheme.title}
               </p>
-              <h4 className="text-sm font-extrabold text-white leading-tight">
+              <h4 className="text-base font-extrabold text-white leading-tight mt-0.5">
                 {currentTheme.defaultOrg}
               </h4>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-500/40 px-2.5 py-1 rounded-full text-[10px] font-mono text-emerald-400 font-bold shadow-inner">
+          <div className="flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-500/40 px-3 py-1 rounded-full text-xs font-mono text-emerald-400 font-bold shadow-inner shrink-0">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
             AI SECURED
           </div>
@@ -161,21 +161,21 @@ export const HolographicIdBadge: React.FC<HolographicIdBadgeProps> = ({ user }) 
         <div className="relative z-10 flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
             {/* Gold EMV Chip */}
-            <div className="w-11 h-8 rounded-lg bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 border border-amber-200/60 p-1 flex flex-col justify-between shadow-md">
+            <div className="w-12 h-8.5 rounded-lg bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 border border-amber-200/60 p-1 flex flex-col justify-between shadow-md">
               <div className="w-full h-0.5 bg-amber-800/40 rounded-full" />
               <div className="w-full h-0.5 bg-amber-800/40 rounded-full" />
               <div className="w-full h-0.5 bg-amber-800/40 rounded-full" />
             </div>
             {/* Contactless / NFC Wave */}
-            <div className="flex items-center gap-0.5 text-slate-500">
-              <Cpu className="h-4 w-4 text-purple-400" />
-              <span className="text-[9px] font-mono text-slate-400">NFC // WEB3</span>
+            <div className="flex items-center gap-1 text-slate-500">
+              <Cpu className="h-4.5 w-4.5 text-purple-400" />
+              <span className="text-xs font-mono text-slate-400">NFC // WEB3</span>
             </div>
           </div>
 
           <div className="text-right">
-            <p className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">{currentTheme.idLabel}</p>
-            <p className="text-xs font-mono font-extrabold text-purple-300 tracking-wider bg-purple-950/60 px-2 py-0.5 rounded-md border border-purple-500/20">
+            <p className="text-xs font-mono text-slate-500 uppercase tracking-widest mb-0.5">{currentTheme.idLabel}</p>
+            <p className="text-sm font-mono font-extrabold text-purple-300 tracking-wider bg-purple-950/60 px-2.5 py-1 rounded-md border border-purple-500/20">
               {currentTheme.defaultId}
             </p>
           </div>
@@ -183,33 +183,33 @@ export const HolographicIdBadge: React.FC<HolographicIdBadgeProps> = ({ user }) 
 
         {/* Voter Details */}
         <div className="relative z-10 grid grid-cols-3 gap-4 border-t border-slate-800/80 pt-4 mb-4">
-          <div className="col-span-2 space-y-1">
-            <p className="text-[9px] font-mono text-slate-500 uppercase tracking-wider">AUTHORIZED IDENTITY</p>
-            <h3 className="text-base font-extrabold text-white tracking-wide truncate">
+          <div className="col-span-2 space-y-1.5">
+            <p className="text-xs font-mono text-slate-500 uppercase tracking-wider">AUTHORIZED IDENTITY</p>
+            <h3 className="text-lg font-extrabold text-white tracking-wide truncate">
               {user.name || 'Registered Voter'}
             </h3>
-            <p className="text-xs text-slate-300 font-medium truncate">{currentTheme.defaultDept}</p>
-            <p className="text-[11px] text-slate-400 font-mono">{currentTheme.subtext}</p>
+            <p className="text-sm text-slate-300 font-medium truncate">{currentTheme.defaultDept}</p>
+            <p className="text-xs text-slate-400 font-mono">{currentTheme.subtext}</p>
           </div>
 
           {/* Biometric Verification Badge */}
           <div className="flex flex-col items-center justify-center p-2 rounded-2xl bg-slate-950/80 border border-slate-800 shadow-inner">
-            <Fingerprint className="h-7 w-7 text-emerald-400 animate-pulse mb-1" />
-            <span className="text-[8px] font-mono text-emerald-300 uppercase font-bold tracking-tighter text-center">
+            <Fingerprint className="h-8 w-8 text-emerald-400 animate-pulse mb-1.5" />
+            <span className="text-[10px] font-mono text-emerald-300 uppercase font-bold tracking-tighter text-center leading-tight">
               BIOMETRICS 100% MATCH
             </span>
           </div>
         </div>
 
         {/* Card Footer: Wallet & Barcode */}
-        <div className="relative z-10 border-t border-slate-800/80 pt-3 flex justify-between items-center text-[10px] text-slate-500 font-mono">
+        <div className="relative z-10 border-t border-slate-800/80 pt-3.5 flex justify-between items-center text-xs text-slate-500 font-mono">
           <div className="flex items-center gap-1.5">
-            <ShieldCheck className="h-3.5 w-3.5 text-indigo-400" />
+            <ShieldCheck className="h-4 w-4 text-indigo-400" />
             <span>CONTRACT: 0x7a3B...21Bf</span>
           </div>
 
           <div className="flex items-center gap-1 text-slate-400">
-            <QrCode className="h-4 w-4 text-purple-400" />
+            <QrCode className="h-4.5 w-4.5 text-purple-400" />
             <span>ETHEREUM LEDGER</span>
           </div>
         </div>

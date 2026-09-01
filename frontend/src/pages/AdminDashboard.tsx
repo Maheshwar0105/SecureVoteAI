@@ -193,7 +193,7 @@ export const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+    <div className="flex-1 bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-12 w-full max-w-full">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-1">

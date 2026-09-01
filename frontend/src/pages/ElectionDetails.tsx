@@ -150,7 +150,7 @@ export const ElectionDetails: React.FC = () => {
   });
 
   return (
-    <div className="flex-1 bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+    <div className="flex-1 bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-12 w-full max-w-full">
       {/* Top Banner */}
       <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 sm:p-8 mb-8 backdrop-blur-md">
         <div className="flex flex-wrap justify-between items-start gap-4">

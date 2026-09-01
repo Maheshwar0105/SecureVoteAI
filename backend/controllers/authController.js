@@ -355,6 +355,20 @@ exports.demoPersonaLogin = async (req, res) => {
 
   const selected = demoProfiles[persona] || demoProfiles.college;
 
+  // Helper to generate deterministic face embedding for demo user if they don't have one
+  const getFaceEmbeddingForEmail = (email) => {
+    const embedding = [];
+    let seed = 0;
+    for (let i = 0; i < email.length; i++) {
+      seed += email.charCodeAt(i);
+    }
+    for (let i = 0; i < 128; i++) {
+      const x = Math.sin(seed + i) * 10000;
+      embedding.push((x - Math.floor(x)) * 2 - 1);
+    }
+    return embedding;
+  };
+
   try {
     let user = await User.findOne({ email: selected.email });
     if (!user) {
@@ -363,8 +377,13 @@ exports.demoPersonaLogin = async (req, res) => {
       user = await User.create({
         ...selected,
         password: hashedPassword,
-        isVerified: true
+        isVerified: true,
+        faceEmbedding: getFaceEmbeddingForEmail(selected.email)
       });
+    } else if (!user.faceEmbedding || user.faceEmbedding.length === 0) {
+      // Auto-populate if missing
+      user.faceEmbedding = getFaceEmbeddingForEmail(selected.email);
+      await user.save();
     }
 
     res.status(200).json({
@@ -390,6 +409,68 @@ exports.demoPersonaLogin = async (req, res) => {
     });
   } catch (error) {
     console.error('Demo login error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+// Face Biometric Login
+exports.loginWithFace = async (req, res) => {
+  const { email, faceEmbedding } = req.body;
+
+  try {
+    if (!email || !faceEmbedding || !Array.isArray(faceEmbedding) || faceEmbedding.length !== 128) {
+      return res.status(400).json({ error: 'Please provide email and a valid face embedding descriptor' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ error: 'No voter registered with this email address' });
+    }
+
+    if (!user.faceEmbedding || user.faceEmbedding.length === 0) {
+      return res.status(400).json({ error: 'No biometric signature registered for this account' });
+    }
+
+    // Calculate Cosine Similarity
+    let dotProduct = 0;
+    let normA = 0;
+    let normB = 0;
+    for (let i = 0; i < 128; i++) {
+      dotProduct += faceEmbedding[i] * user.faceEmbedding[i];
+      normA += faceEmbedding[i] * faceEmbedding[i];
+      normB += user.faceEmbedding[i] * user.faceEmbedding[i];
+    }
+    const similarity = dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+
+    // Threshold check (0.85 is standard for facial descriptor vectors)
+    if (similarity < 0.85) {
+      return res.status(400).json({ error: `Biometric mismatch. Face does not match the registered voter (${(similarity * 100).toFixed(1)}% match).` });
+    }
+
+    res.status(200).json({
+      message: 'Face verified successfully',
+      token: generateToken(user._id),
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        voterId: user.voterId,
+        organizationType: user.organizationType,
+        organizationId: user.organizationId,
+        organizationName: user.organizationName,
+        department: user.department,
+        yearOrGrade: user.yearOrGrade,
+        house: user.house,
+        role: user.role,
+        isVerified: user.isVerified,
+        isWalletBound: user.isWalletBound,
+        walletAddress: user.walletAddress,
+        faceEmbedding: user.faceEmbedding
+      }
+    });
+  } catch (error) {
+    console.error('Face verification login error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
