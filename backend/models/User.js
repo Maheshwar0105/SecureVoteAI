@@ -98,8 +98,6 @@ const UserSchema = new mongoose.Schema({
 });
 
 // Indexes for fast lookup
-UserSchema.index({ email: 1 });
-UserSchema.index({ walletAddress: 1 });
 UserSchema.index({ role: 1 });
 
 // Soft Delete Middleware to filter out deleted users

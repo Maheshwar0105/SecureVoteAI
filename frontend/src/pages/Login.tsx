@@ -29,7 +29,7 @@ interface LoginProps {
 export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const navigate = useNavigate();
   const { connectWallet, signChallenge } = useWeb3();
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -46,24 +46,20 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     try {
       const res = await api.post('/auth/login', { email, password });
       const { token, user } = res.data;
-      
+
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       sessionStorage.setItem('justLoggedIn', 'true');
-      
+
       onLoginSuccess(user);
-      
+
       if (user.role === 'admin') {
         navigate('/admin');
       } else {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      if (err.code === 'ERR_NETWORK' || !err.response) {
-        setError('Network Error: Unable to reach backend. Check VITE_API_URL in Netlify or wait ~50s for Render free-tier cold start.');
-      } else {
-        setError(err.response?.data?.error || 'Login failed. Please check credentials or register a new account.');
-      }
+      setError(err.response?.data?.error || 'Login failed. Please check credentials.');
     } finally {
       setIsLoading(false);
     }
@@ -95,11 +91,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       });
 
       const { token, user } = loginRes.data;
-      
+
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       sessionStorage.setItem('justLoggedIn', 'true');
-      
+
       onLoginSuccess(user);
 
       if (user.role === 'admin') {
@@ -133,7 +129,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       localStorage.setItem('user', JSON.stringify(res.data.user));
       sessionStorage.setItem('justLoggedIn', 'true');
       onLoginSuccess(res.data.user);
-      
+
       if (res.data.user.role === 'admin') {
         navigate('/admin');
       } else {
@@ -176,16 +172,16 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
       {/* Main Dual Grid: Command Center Art Showcase + Auth Interface */}
       <div className="w-full max-w-full grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-        
+
         {/* Left Column: Command Center Artwork with Interactive Hotspots */}
         <div className="lg:col-span-7 flex flex-col justify-between space-y-4">
           <div className="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 shadow-2xl group flex-1 max-h-[380px] xl:max-h-[420px] flex items-center justify-center">
-            <img 
-              src="/secure_voting_command.png" 
-              alt="Secure Voting AI Command Center" 
+            <img
+              src="/secure_voting_command.png"
+              alt="Secure Voting AI Command Center"
               className="w-full h-full object-cover object-center rounded-2xl transition duration-500 group-hover:scale-102"
             />
-            
+
             {/* Holographic Top Banner Overlay */}
             <div className="absolute top-3 left-3 right-3 flex justify-between items-center bg-slate-950/85 border border-cyan-500/40 px-3.5 py-1.5 rounded-xl backdrop-blur-md shadow-lg text-[11px] font-mono">
               <div className="flex items-center gap-2">

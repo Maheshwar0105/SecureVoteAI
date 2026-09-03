@@ -17,22 +17,8 @@ const app = express();
 
 // Security Middlewares
 app.use(helmet());
-
-const allowedOrigins = [
-  process.env.CLIENT_URL,
-  'https://securevoteai.netlify.app',
-  'http://localhost:5173',
-  'http://localhost:3000'
-].filter(Boolean);
-
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || origin.endsWith('.netlify.app')) {
-      return callback(null, true);
-    }
-    return callback(null, true);
-  },
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
