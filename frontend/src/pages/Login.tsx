@@ -59,7 +59,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed. Please check credentials.');
+      if (err.code === 'ERR_NETWORK' || !err.response) {
+        setError('Network Error: Unable to reach backend. Ensure backend is running or wait ~50s for Render cold start. TIP: Click "Quick Viva Persona Switcher" above to demo instantly!');
+      } else {
+        setError(err.response?.data?.error || 'Login failed. Please check credentials.');
+      }
     } finally {
       setIsLoading(false);
     }

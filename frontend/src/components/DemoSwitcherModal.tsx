@@ -77,6 +77,73 @@ export const DemoSwitcherModal: React.FC<DemoSwitcherModalProps> = ({
     }
   ];
 
+  const demoFallbackProfiles: Record<string, any> = {
+    college: {
+      id: 'demo_college_user_id',
+      name: 'Aarav Sharma (Student)',
+      email: 'aarav.cs24@apex-tech.edu',
+      phoneNumber: '+91 98234 11201',
+      organizationType: 'college',
+      organizationId: 'ROLL-CS-2024-8819',
+      organizationName: 'Apex Institute of Technology & Research',
+      department: 'Computer Science & AI Engineering',
+      yearOrGrade: '3rd Year (Semester 6)',
+      role: 'voter',
+      isVerified: true
+    },
+    company: {
+      id: 'demo_company_user_id',
+      name: 'Priya Mukherjee (Employee)',
+      email: 'priya.m@nexusglobal.com',
+      phoneNumber: '+91 94120 77632',
+      organizationType: 'company',
+      organizationId: 'EMP-NEX-4091',
+      organizationName: 'Nexus Global Enterprise Ltd.',
+      department: 'Corporate Cafeteria & Food Welfare Board',
+      yearOrGrade: 'Senior Engineer',
+      role: 'voter',
+      isVerified: true
+    },
+    school: {
+      id: 'demo_school_user_id',
+      name: 'Rohan Verma (Student Prefect)',
+      email: 'rohan.v@greenwood-academy.edu',
+      phoneNumber: '+91 98111 22334',
+      organizationType: 'school',
+      organizationId: 'SCH-ADM-9941',
+      organizationName: 'Greenwood International Academy',
+      department: 'Senior Wing',
+      yearOrGrade: 'Grade 11 - Section A',
+      house: 'Sapphire House',
+      role: 'voter',
+      isVerified: true
+    },
+    civic: {
+      id: 'demo_civic_user_id',
+      name: 'Devendra Patil (Citizen Voter)',
+      email: 'devendra.patil@civicnet.gov.in',
+      phoneNumber: '+91 97654 32109',
+      voterId: 'EPIC-MH-2026-8794',
+      organizationType: 'general',
+      organizationId: 'WARD-SEC-402',
+      organizationName: 'National Democratic Election Commission',
+      department: 'Constituency 42 (Metropolitan)',
+      role: 'voter',
+      isVerified: true
+    },
+    admin: {
+      id: 'demo_admin_user_id',
+      name: 'Dr. Vikramaditya (Election Commissioner)',
+      email: 'admin@securevote.ai',
+      phoneNumber: '+91 99999 88888',
+      organizationType: 'general',
+      organizationName: 'SecureVoteAI Decentralized Authority',
+      department: 'Chief Election Commission & AI Security Ops',
+      role: 'admin',
+      isVerified: true
+    }
+  };
+
   const handleSwitch = async (personaId: string) => {
     setLoadingPersona(personaId);
     try {
@@ -91,7 +158,18 @@ export const DemoSwitcherModal: React.FC<DemoSwitcherModalProps> = ({
         navigate('/dashboard');
       }
     } catch (err: any) {
-      console.error('Failed to switch persona:', err);
+      console.warn('Backend unavailable, using instant demo persona fallback:', err);
+      const fallbackUser = demoFallbackProfiles[personaId] || demoFallbackProfiles.college;
+      const mockToken = 'mock_jwt_token_' + Date.now();
+      localStorage.setItem('token', mockToken);
+      localStorage.setItem('user', JSON.stringify(fallbackUser));
+      onSelectPersona(fallbackUser);
+      onClose();
+      if (personaId === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } finally {
       setLoadingPersona(null);
     }
