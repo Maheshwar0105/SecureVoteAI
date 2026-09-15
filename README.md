@@ -8,4 +8,4 @@ This repository contains the full source code for the B.Tech Final Year Project:
 - `frontend/`: React.js (Vite) + Tailwind CSS + TypeScript frontend interface.
 - `blockchain/`: Solidity Smart Contracts & Hardhat development environment.
 - `ai/`: Python & FastAPI service for anomaly detection and fraud analysis.
-- `face-verification/`: Biometrics and liveness detection models.
+- `face-verification/`: Biometrics and liveness detection models   .

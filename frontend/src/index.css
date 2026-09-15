@@ -3,7 +3,15 @@
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
-    @apply bg-slate-950 text-slate-100 antialiased selection:bg-purple-500 selection:text-white;
+    background-color: #020617;
+    color: #f1f5f9;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: #a855f7;
+    color: #ffffff;
   }
 
   code, pre, .font-mono {
