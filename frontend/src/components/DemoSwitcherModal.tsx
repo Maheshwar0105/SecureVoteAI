@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import Badge from './Badge';
 import { GraduationCap, Briefcase, School, Building, ShieldCheck, X, Sparkles, ArrowRight } from 'lucide-react';
 
 interface DemoSwitcherModalProps {
@@ -27,8 +28,9 @@ export const DemoSwitcherModal: React.FC<DemoSwitcherModalProps> = ({
       institution: 'Apex Institute of Technology & Research',
       department: 'Computer Science & AI Engineering',
       icon: GraduationCap,
-      color: 'from-cyan-500 to-indigo-600',
+      color: 'from-teal-500 to-indigo-600',
       badge: 'Student Council & Mess Voting',
+      badgeVariant: 'teal' as const,
       description: 'Vote for Student Council President, Food & Mess Secretary, and Cultural Head with verified College Roll No.'
     },
     {
@@ -40,6 +42,7 @@ export const DemoSwitcherModal: React.FC<DemoSwitcherModalProps> = ({
       icon: Briefcase,
       color: 'from-emerald-500 to-teal-600',
       badge: 'Food Dept & Workplace Governance',
+      badgeVariant: 'success' as const,
       description: 'Vote for Cafeteria Food Quality Committee Lead, Menu Governance, and Workplace Culture Representatives.'
     },
     {
@@ -51,6 +54,7 @@ export const DemoSwitcherModal: React.FC<DemoSwitcherModalProps> = ({
       icon: School,
       color: 'from-amber-500 to-rose-600',
       badge: 'Head Boy & Head Girl Ballot',
+      badgeVariant: 'warning' as const,
       description: 'Cast ballot for Head Boy, Head Girl, Sports Captain, and House Captains with admission roll authentication.'
     },
     {
@@ -62,6 +66,7 @@ export const DemoSwitcherModal: React.FC<DemoSwitcherModalProps> = ({
       icon: Building,
       color: 'from-purple-500 to-indigo-600',
       badge: 'General Legislative Assembly',
+      badgeVariant: 'primary' as const,
       description: 'National election ballot with verified Phone Number (+ OTP) and EPIC Voter ID ledger authentication.'
     },
     {
@@ -73,6 +78,7 @@ export const DemoSwitcherModal: React.FC<DemoSwitcherModalProps> = ({
       icon: ShieldCheck,
       color: 'from-fuchsia-600 to-purple-800',
       badge: 'Full Administrative Controls',
+      badgeVariant: 'info' as const,
       description: 'Deploy new domain elections, configure candidate positions, monitor live AI anomaly fraud warnings.'
     }
   ];
@@ -177,18 +183,18 @@ export const DemoSwitcherModal: React.FC<DemoSwitcherModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl overflow-hidden">
         {/* Hologram Accent Glow */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
 
         {/* Header */}
         <div className="flex justify-between items-start mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/20">
+            <div className="p-2.5 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-lg">
               <Sparkles className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-white">Live Presentation Persona Switcher</h2>
+              <h2 className="text-xl font-extrabold tracking-tight text-white">Live Presentation Persona Switcher</h2>
               <p className="text-xs text-slate-400 mt-0.5">
                 Switch instantly between College, Corporate, School, Civic, and Admin roles.
               </p>
@@ -197,7 +203,7 @@ export const DemoSwitcherModal: React.FC<DemoSwitcherModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
@@ -212,7 +218,7 @@ export const DemoSwitcherModal: React.FC<DemoSwitcherModalProps> = ({
               <div
                 key={persona.id}
                 onClick={() => !isLoading && handleSwitch(persona.id)}
-                className="group relative bg-slate-950/70 border border-slate-800 hover:border-purple-500/60 rounded-2xl p-4 transition-all duration-200 cursor-pointer hover:bg-slate-850/50 flex items-center justify-between gap-4"
+                className="group relative bg-slate-950/70 border border-slate-800 hover:border-purple-500/60 rounded-xl p-4 transition-all duration-200 cursor-pointer hover:bg-slate-900 flex items-center justify-between gap-4"
               >
                 <div className="flex items-center gap-3.5">
                   <div className={`p-3 rounded-xl bg-gradient-to-br ${persona.color} text-white shadow-md shrink-0`}>
@@ -223,9 +229,9 @@ export const DemoSwitcherModal: React.FC<DemoSwitcherModalProps> = ({
                       <h4 className="font-bold text-white text-sm group-hover:text-purple-300 transition tracking-tight">
                         {persona.title}
                       </h4>
-                      <span className="text-[9px] font-mono font-bold bg-slate-900 border border-slate-700 text-slate-300 px-2 py-0.5 rounded-full">
+                      <Badge variant={persona.badgeVariant} size="sm">
                         {persona.badge}
-                      </span>
+                      </Badge>
                     </div>
                     <p className="text-[11px] text-slate-400 font-mono">{persona.subtitle}</p>
                     <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">{persona.description}</p>
@@ -235,7 +241,7 @@ export const DemoSwitcherModal: React.FC<DemoSwitcherModalProps> = ({
                 <div className="shrink-0 flex items-center">
                   <button
                     disabled={isLoading}
-                    className="bg-purple-600/80 group-hover:bg-purple-500 text-white p-2 rounded-xl text-xs font-semibold flex items-center gap-1 transition shadow-md"
+                    className="bg-purple-600/80 group-hover:bg-purple-500 text-white p-2 rounded-xl text-xs font-semibold flex items-center gap-1 transition shadow-md cursor-pointer"
                   >
                     {isLoading ? (
                       <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -252,7 +258,9 @@ export const DemoSwitcherModal: React.FC<DemoSwitcherModalProps> = ({
         {/* Footer info */}
         <div className="mt-6 pt-4 border-t border-slate-800 flex justify-between items-center text-[10px] text-slate-500 font-mono">
           <span>SECUREVOTE AI // VIVA DEMONSTRATION ENGINE</span>
-          <span className="text-emerald-400">100% SEED READY</span>
+          <Badge variant="success" size="sm">
+            100% SEED READY
+          </Badge>
         </div>
       </div>
     </div>

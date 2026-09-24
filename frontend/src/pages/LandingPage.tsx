@@ -4,9 +4,10 @@ import Futuristic3DCanvas from '../components/Futuristic3DCanvas';
 import HolographicIdBadge from '../components/HolographicIdBadge';
 import AIAnomalyRadar from '../components/AIAnomalyRadar';
 import DemoSwitcherModal from '../components/DemoSwitcherModal';
+import Card, { CardContent } from '../components/Card';
+import Badge from '../components/Badge';
 import {
   ShieldAlert,
-  Database,
   Cpu,
   ChevronDown,
   CheckCircle,
@@ -18,7 +19,6 @@ import {
   Fingerprint,
   ArrowRight,
   Vote,
-  Lock,
   Layers
 } from 'lucide-react';
 
@@ -40,8 +40,7 @@ export const LandingPage: React.FC = () => {
       title: 'College & University Student Elections',
       tag: 'CAMPUS DEMOCRACY SUITE',
       icon: GraduationCap,
-      color: 'from-cyan-500 to-indigo-600',
-      badgeColor: 'bg-cyan-950 border-cyan-500/30 text-cyan-300',
+      badgeVariant: 'teal' as const,
       description: 'Empower student bodies to conduct tamper-proof elections for Student Council Presidents, Mess & Food Committees, Cultural Heads, and Department Representatives using verified Student Roll Numbers and College IDs.',
       bullets: [
         'Roll Number & Department verification (CSE, ECE, Mech, MBA, Biotech)',
@@ -64,8 +63,7 @@ export const LandingPage: React.FC = () => {
       title: 'Corporate Workplace & Cafeteria Governance',
       tag: 'ENTERPRISE BALLOT ENGINE',
       icon: Briefcase,
-      color: 'from-emerald-500 to-teal-600',
-      badgeColor: 'bg-emerald-950 border-emerald-500/30 text-emerald-300',
+      badgeVariant: 'success' as const,
       description: 'Streamline internal enterprise decision-making, Cafeteria Menu Governance, Food Quality Committees, Workplace Culture representatives, and Employee Welfare Boards with Employee ID authentication.',
       bullets: [
         'Corporate Single Sign-On (SSO) & Employee ID credential binding',
@@ -89,8 +87,7 @@ export const LandingPage: React.FC = () => {
       title: 'School Prefect & House Council Elections',
       tag: 'K-12 LEADERSHIP PLATFORM',
       icon: School,
-      color: 'from-amber-500 to-rose-600',
-      badgeColor: 'bg-amber-950 border-amber-500/30 text-amber-300',
+      badgeVariant: 'warning' as const,
       description: 'Provide young scholars with hands-on experience in modern decentralized democracy by voting for Head Boy, Head Girl, Sports Captains, and House Prefects (Ruby, Sapphire, Emerald, Topaz).',
       bullets: [
         'Admission Number and House affiliation authentication',
@@ -115,8 +112,7 @@ export const LandingPage: React.FC = () => {
       title: 'National & Civic Legislative Elections',
       tag: 'GOVERNMENT GRADE EVM DAPP',
       icon: Building,
-      color: 'from-purple-500 to-indigo-600',
-      badgeColor: 'bg-purple-950 border-purple-500/30 text-purple-300',
+      badgeVariant: 'primary' as const,
       description: 'End-to-end verifiable nationwide electoral framework integrating EPIC Voter IDs, SMS OTP multi-factor authentication, Ethereum smart contracts, and real-time Isolation Forest AI anomaly threat monitors.',
       bullets: [
         'National EPIC Voter ID + Registered Mobile Number (+ SMS OTP)',
@@ -162,49 +158,53 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="flex-1 bg-slate-950 text-slate-100 flex flex-col justify-start bg-grid relative overflow-hidden" dir="ltr">
 
-      {/* Hero Section with 3D Holographic Canvas & AI-Blockchain Background */}
+      {/* Hero Section */}
       <section className="relative pt-6 pb-12 lg:pt-8 lg:pb-16 px-4 sm:px-6 lg:px-8 w-full max-w-[1400px] mx-auto overflow-hidden">
-        {/* Background Artwork Layer with high-tech glow & gradient overlays */}
+        {/* Background Artwork Layer */}
         <div className="absolute inset-0 -z-10 rounded-3xl overflow-hidden opacity-35 pointer-events-none">
           <img 
             src="/securevote_hero_bg.png" 
             alt="SecureVote AI Background" 
+            onError={(e) => {
+              const target = e.currentTarget;
+              target.onerror = null;
+              target.src = '/secure_voting_command.png';
+            }}
             className="w-full h-full object-cover object-center scale-105 filter contrast-125 brightness-90"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/30" />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/80" />
         </div>
 
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-purple-600/20 via-indigo-600/15 to-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-purple-600/20 via-indigo-600/15 to-teal-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center">
           {/* Left Column: Headline & CTA */}
           <div className="lg:col-span-7 text-left space-y-5 animate-fade-in">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-950/80 to-indigo-950/80 border border-purple-500/30 px-4 py-1.5 rounded-full text-xs font-mono text-purple-300 shadow-inner">
-              <Sparkles className="h-4 w-4 text-purple-400 animate-spin" />
-              <span>NEXT-GEN AI & BLOCKCHAIN VOTING INFRASTRUCTURE</span>
-            </div>
+            <Badge variant="primary" icon={Sparkles}>
+              NEXT-GEN AI & BLOCKCHAIN VOTING INFRASTRUCTURE
+            </Badge>
 
             <div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.15]">
                 The Future of{' '}
-                <span className="bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-teal-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
                   Secure Voting
                 </span>
               </h1>
-              <p className="text-base sm:text-lg lg:text-xl font-bold bg-gradient-to-r from-cyan-300 via-indigo-200 to-purple-300 bg-clip-text text-transparent mt-2.5 tracking-tight">
+              <p className="text-base sm:text-lg lg:text-xl font-bold bg-gradient-to-r from-teal-300 via-indigo-200 to-purple-300 bg-clip-text text-transparent mt-2.5 tracking-tight">
                 Built with AI. Secured by Blockchain.
               </p>
             </div>
 
-            <p className="text-base text-slate-300 leading-relaxed max-w-xl">
-              One unified platform for <strong className="text-cyan-300">College Student Councils</strong>, <strong className="text-emerald-300">Corporate Workplace & Food Depts</strong>, <strong className="text-amber-300">School Prefects</strong>, and <strong className="text-purple-300">Civic Elections</strong>—powered by Ethereum smart contracts, real-time AI anomaly detection, and biometric face verification.
+            <p className="body-base max-w-xl">
+              One unified platform for <strong className="text-teal-300">College Student Councils</strong>, <strong className="text-emerald-300">Corporate Workplace & Food Depts</strong>, <strong className="text-amber-300">School Prefects</strong>, and <strong className="text-purple-300">Civic Elections</strong>—powered by Ethereum smart contracts, real-time AI anomaly detection, and biometric face verification.
             </p>
 
             <div className="flex flex-wrap gap-4 pt-2">
               <button
                 onClick={() => navigate('/register')}
-                className="bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold px-8 py-3.5 rounded-2xl transition shadow-lg shadow-purple-500/25 active:scale-95 cursor-pointer flex items-center gap-2 text-sm"
+                className="bg-gradient-to-r from-purple-600 via-indigo-600 to-teal-600 hover:from-purple-500 hover:to-teal-500 text-white font-bold px-8 py-3.5 rounded-xl transition shadow-lg shadow-purple-500/25 active:scale-95 cursor-pointer flex items-center gap-2 text-sm"
               >
                 <Vote className="h-4 w-4" />
                 <span>Cast Your Vote</span>
@@ -213,7 +213,7 @@ export const LandingPage: React.FC = () => {
 
               <button
                 onClick={() => setShowDemoModal(true)}
-                className="bg-slate-900/90 border border-slate-700 hover:border-purple-500/50 hover:bg-slate-850 text-slate-200 font-bold px-6 py-3.5 rounded-2xl transition active:scale-95 cursor-pointer flex items-center gap-2 text-sm shadow-md"
+                className="bg-slate-900 border border-slate-700 hover:border-purple-500/50 hover:bg-slate-850 text-slate-200 font-bold px-6 py-3.5 rounded-xl transition active:scale-95 cursor-pointer flex items-center gap-2 text-sm shadow-md"
               >
                 <Sparkles className="h-4 w-4 text-purple-400" />
                 <span>Live Viva Demo</span>
@@ -229,37 +229,32 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: 3D Holographic Interactive Canvas */}
+          {/* Right Column: 3D Holographic Canvas Container */}
           <div className="lg:col-span-5 relative">
-            <div className="relative bg-gradient-to-b from-slate-900/80 via-slate-950/90 to-slate-900/80 border border-slate-800/80 rounded-3xl p-3 shadow-2xl backdrop-blur-xl overflow-hidden min-h-[420px] flex flex-col justify-between">
-
+            <Card className="min-h-[420px] flex flex-col justify-between p-3">
               {/* Interactive 3D Node Mesh */}
               <Futuristic3DCanvas />
 
               {/* Status footer bar inside canvas */}
-              <div className="p-3 bg-slate-950/80 border border-slate-850 rounded-2xl flex justify-between items-center text-[10px] font-mono text-slate-400">
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-                  <span className="text-emerald-400 font-bold">SMART CONTRACT 0x7a3B... ONLINE</span>
-                </div>
+              <div className="p-3 bg-slate-950/90 border border-slate-800 rounded-xl flex justify-between items-center text-[10px] font-mono text-slate-400">
+                <Badge variant="success" dot size="sm">
+                  SMART CONTRACT 0x7a3B... ONLINE
+                </Badge>
                 <span>ISOLATION FOREST RISK: 0.02</span>
               </div>
-            </div>
+            </Card>
           </div>
         </div>
       </section>
 
       {/* Metrics Row */}
-      <section className="bg-slate-900/40 border-y border-slate-850 py-10 px-4 sm:px-6 lg:px-8">
+      <section className="bg-slate-900/40 border-y border-slate-800/80 py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {stats.map((stat, idx) => (
-            <div
-              key={idx}
-              className="p-5 bg-slate-900/60 border border-slate-800/80 rounded-2xl backdrop-blur-sm transition hover:border-purple-500/40"
-            >
+            <Card key={idx} interactive className="p-5 text-center">
               <p className="text-2xl sm:text-3xl font-black text-white tracking-tight font-mono">{stat.value}</p>
               <p className="text-[11px] font-semibold text-slate-400 mt-1 uppercase tracking-wider">{stat.label}</p>
-            </div>
+            </Card>
           ))}
         </div>
       </section>
@@ -267,13 +262,13 @@ export const LandingPage: React.FC = () => {
       {/* Interactive Multi-Domain Ecosystem Explorer */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-1.5 bg-purple-950/60 border border-purple-500/30 px-3.5 py-1 rounded-full text-xs font-mono text-purple-300 mb-3">
-            <Layers className="h-3.5 w-3.5" /> MULTI-TENANT ELECTORAL ADAPTATION
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
+          <Badge variant="primary" icon={Layers} className="mb-3">
+            MULTI-TENANT ELECTORAL ADAPTATION
+          </Badge>
+          <h2 className="heading-lg">
             Custom Tailored for Every Institution
           </h2>
-          <p className="text-slate-400 mt-2 text-sm max-w-2xl mx-auto">
+          <p className="body-base max-w-2xl mx-auto mt-2">
             Experience how SecureVoteAI customizes identity models, ballots, and candidate profiles for each specific domain.
           </p>
         </div>
@@ -292,10 +287,11 @@ export const LandingPage: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveDomainTab(tab.id as any)}
-                className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${isActive
+                className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                  isActive
                     ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/20 scale-105 border border-purple-400/30'
-                    : 'bg-slate-900/80 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-850'
-                  }`}
+                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+                }`}
               >
                 <Icon className="h-4 w-4" />
                 <span>{tab.label}</span>
@@ -305,56 +301,57 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* Active Domain Detail View */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-slate-900/40 border border-slate-800/80 rounded-3xl p-6 sm:p-10 backdrop-blur-md">
-          {/* Domain Explanation & Features */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider border bg-slate-950 text-slate-300">
-              <currentDomain.icon className="h-4 w-4 text-purple-400" />
-              <span>{currentDomain.tag}</span>
+        <Card className="p-6 sm:p-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Domain Explanation & Features */}
+            <div className="lg:col-span-7 space-y-6">
+              <Badge variant={currentDomain.badgeVariant} icon={currentDomain.icon}>
+                {currentDomain.tag}
+              </Badge>
+
+              <h3 className="heading-md text-2xl sm:text-3xl">
+                {currentDomain.title}
+              </h3>
+
+              <p className="body-base">
+                {currentDomain.description}
+              </p>
+
+              <div className="space-y-3 pt-2">
+                {currentDomain.bullets.map((bullet, idx) => (
+                  <div key={idx} className="flex items-start gap-3 text-xs sm:text-sm text-slate-300">
+                    <CheckCircle className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span>{bullet}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-4 flex flex-wrap gap-4">
+                <button
+                  onClick={() => navigate('/register')}
+                  className="bg-purple-600 hover:bg-purple-500 text-white text-xs sm:text-sm font-bold px-6 py-3 rounded-xl transition cursor-pointer shadow-md"
+                >
+                  Register For This Domain
+                </button>
+                <button
+                  onClick={() => setShowDemoModal(true)}
+                  className="bg-slate-950 border border-slate-800 hover:bg-slate-850 text-slate-300 text-xs sm:text-sm font-bold px-6 py-3 rounded-xl transition cursor-pointer flex items-center gap-2"
+                >
+                  <Sparkles className="h-4 w-4 text-purple-400" />
+                  <span>Try Live Persona</span>
+                </button>
+              </div>
             </div>
 
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-white">
-              {currentDomain.title}
-            </h3>
-
-            <p className="text-slate-300 text-sm leading-relaxed">
-              {currentDomain.description}
-            </p>
-
-            <div className="space-y-3 pt-2">
-              {currentDomain.bullets.map((bullet, idx) => (
-                <div key={idx} className="flex items-start gap-3 text-xs sm:text-sm text-slate-300">
-                  <CheckCircle className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
-                  <span>{bullet}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="pt-4 flex flex-wrap gap-4">
-              <button
-                onClick={() => navigate('/register')}
-                className="bg-purple-600 hover:bg-purple-500 text-white text-xs sm:text-sm font-bold px-6 py-3 rounded-xl transition cursor-pointer shadow-md"
-              >
-                Register For This Domain
-              </button>
-              <button
-                onClick={() => setShowDemoModal(true)}
-                className="bg-slate-950 border border-slate-800 hover:bg-slate-850 text-slate-300 text-xs sm:text-sm font-bold px-6 py-3 rounded-xl transition cursor-pointer flex items-center gap-2"
-              >
-                <Sparkles className="h-4 w-4 text-purple-400" />
-                <span>Try Live Persona</span>
-              </button>
+            {/* 3D Holographic Identity Badge for this domain */}
+            <div className="lg:col-span-5 flex flex-col items-center">
+              <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-2">
+                INTERACTIVE 3D HOLOGRAPHIC SMART PASS (MOVE MOUSE)
+              </p>
+              <HolographicIdBadge user={currentDomain.sampleUser} />
             </div>
           </div>
-
-          {/* 3D Holographic Identity Badge for this domain */}
-          <div className="lg:col-span-5 flex flex-col items-center">
-            <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-2">
-              INTERACTIVE 3D HOLOGRAPHIC SMART PASS (MOVE MOUSE)
-            </p>
-            <HolographicIdBadge user={currentDomain.sampleUser} />
-          </div>
-        </div>
+        </Card>
       </section>
 
       {/* Real-time AI Radar & Security Architecture */}
@@ -362,31 +359,30 @@ export const LandingPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           {/* Security Overview */}
           <div className="lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-2 bg-indigo-950/60 border border-indigo-500/30 px-3.5 py-1 rounded-full text-xs font-mono text-indigo-300">
-              <ShieldAlert className="h-4 w-4 text-indigo-400" />
-              <span>AI FRAUD & SYBIL DEFENSE MATRIX</span>
-            </div>
+            <Badge variant="teal" icon={ShieldAlert}>
+              AI FRAUD & SYBIL DEFENSE MATRIX
+            </Badge>
 
-            <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
+            <h2 className="heading-lg">
               Zero-Trust Architecture with Real-Time AI Sentinel
             </h2>
 
-            <p className="text-slate-300 text-sm leading-relaxed">
+            <p className="body-base">
               While traditional electronic voting machines are vulnerable to physical tampering and centralized databases can be manipulated, SecureVoteAI unites zero-trust Ethereum smart contracts with a real-time machine learning isolation forest scanner.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              <div className="p-4 bg-slate-900/60 border border-slate-800 rounded-2xl">
-                <Cpu className="h-6 w-6 text-indigo-400 mb-2" />
+              <Card className="p-4">
+                <Cpu className="h-6 w-6 text-teal-400 mb-2" />
                 <h4 className="font-bold text-white text-sm">Python ML Anomaly Engine</h4>
                 <p className="text-slate-400 text-xs mt-1">Calculates multidimensional risk scores on timing intervals, click telemetry, and request volumes.</p>
-              </div>
+              </Card>
 
-              <div className="p-4 bg-slate-900/60 border border-slate-800 rounded-2xl">
+              <Card className="p-4">
                 <Fingerprint className="h-6 w-6 text-emerald-400 mb-2" />
                 <h4 className="font-bold text-white text-sm">Deep Biometric Liveness</h4>
                 <p className="text-slate-400 text-xs mt-1">Extracts 128-d face descriptors to ensure only registered physical voters cast authorized votes.</p>
-              </div>
+              </Card>
             </div>
           </div>
 
@@ -400,23 +396,23 @@ export const LandingPage: React.FC = () => {
       {/* FAQ Section */}
       <section className="bg-slate-900/20 border-t border-slate-900 py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold tracking-tight text-white text-center mb-12">Frequently Asked Questions</h2>
+          <h2 className="heading-lg text-center mb-12">Frequently Asked Questions</h2>
           <div className="space-y-4">
             {faqs.map((faq, idx) => (
-              <div key={idx} className="border border-slate-850 bg-slate-900/50 rounded-2xl overflow-hidden">
+              <Card key={idx} className="p-0 overflow-hidden">
                 <button
                   onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                  className="w-full flex justify-between items-center p-6 text-left font-semibold text-white hover:bg-slate-850/30 transition cursor-pointer"
+                  className="w-full flex justify-between items-center p-6 text-left font-semibold text-white hover:bg-slate-800/40 transition cursor-pointer"
                 >
                   <span>{faq.q}</span>
                   <ChevronDown className={`h-5 w-5 text-slate-400 transition-transform ${openFaq === idx ? 'rotate-180' : ''}`} />
                 </button>
                 {openFaq === idx && (
-                  <div className="p-6 pt-0 text-slate-400 text-sm border-t border-slate-850 leading-relaxed bg-slate-950/20">
+                  <div className="p-6 pt-0 text-slate-400 text-sm border-t border-slate-800/80 leading-relaxed bg-slate-950/20">
                     {faq.a}
                   </div>
                 )}
-              </div>
+              </Card>
             ))}
           </div>
         </div>

@@ -1,19 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
+import Card, { CardHeader, CardTitle } from '../components/Card';
+import Badge from '../components/Badge';
 import {
   Calendar,
   UserPlus,
-  AlertTriangle,
   Users,
-  Cpu,
-  ShieldAlert,
-  GraduationCap,
-  Briefcase,
-  School,
-  Building,
-  CheckCircle,
-  Plus,
-  Trash2
+  Cpu
 } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
@@ -197,26 +190,28 @@ export const AdminDashboard: React.FC = () => {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-[10px] font-mono font-bold uppercase px-3 py-0.5 rounded-full bg-purple-950 border border-purple-500/30 text-purple-300">
+          <Badge variant="primary" size="sm">
             ADMINISTRATIVE CONSOLE
-          </span>
-          <span className="text-[10px] font-mono text-emerald-400 font-bold">● LEDGER SYNC ONLINE</span>
+          </Badge>
+          <Badge variant="success" dot size="sm">
+            LEDGER SYNC ONLINE
+          </Badge>
         </div>
-        <h1 className="text-3xl font-extrabold text-white">Chief Election Administration</h1>
+        <h1 className="heading-lg">Chief Election Administration</h1>
         <p className="text-slate-400 text-xs mt-1">
           Deploy multi-domain elections, configure candidate slots (Head Boy/Girl, Food Dept, President), and monitor AI fraud alerts.
         </p>
       </div>
 
-      {message && <div className="text-xs bg-emerald-950/40 border border-emerald-500/30 p-3.5 rounded-2xl text-emerald-300 mb-6 font-mono">{message}</div>}
-      {error && <div className="text-xs bg-red-950/40 border border-red-500/30 p-3.5 rounded-2xl text-red-300 mb-6 font-mono">{error}</div>}
+      {message && <div className="text-xs bg-emerald-950/40 border border-emerald-500/30 p-3.5 rounded-xl text-emerald-300 mb-6 font-mono">{message}</div>}
+      {error && <div className="text-xs bg-rose-950/40 border border-rose-500/30 p-3.5 rounded-xl text-rose-300 mb-6 font-mono">{error}</div>}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Create Election & Add Candidate */}
         <div className="lg:col-span-7 space-y-8">
           
           {/* Create Multi-Domain Election */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
+          <Card>
             <h3 className="font-extrabold text-white text-base mb-4 flex items-center gap-2">
               <Calendar className="h-5 w-5 text-purple-400" /> Deploy Multi-Domain Election
             </h3>
@@ -249,69 +244,69 @@ export const AdminDashboard: React.FC = () => {
 
             <form onSubmit={handleCreateElection} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Election Title</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">Election Title</label>
                 <input
                   type="text"
                   required
                   value={elTitle}
                   onChange={(e) => setElTitle(e.target.value)}
                   placeholder="e.g. Apex Tech Student Council 2026"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-purple-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-purple-500 transition font-mono"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Institution Name</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">Institution Name</label>
                 <input
                   type="text"
                   required
                   value={elOrgName}
                   onChange={(e) => setElOrgName(e.target.value)}
                   placeholder="Apex University / Nexus Global"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-purple-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-purple-500 transition"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Contested Positions (Comma-separated)</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">Contested Positions</label>
                 <input
                   type="text"
                   required
                   value={elPositions}
                   onChange={(e) => setElPositions(e.target.value)}
                   placeholder="Head Boy, Head Girl, President"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-purple-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-purple-500 transition"
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Description</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">Description</label>
                 <textarea
                   required
                   value={elDesc}
                   onChange={(e) => setElDesc(e.target.value)}
                   placeholder="Provide scope, guidelines, and eligible voting departments..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 h-16 text-slate-200 text-sm focus:outline-none focus:border-purple-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 h-16 text-slate-200 text-sm focus:outline-none focus:border-purple-500 transition"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Start Date</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">Start Date</label>
                 <input
                   type="datetime-local"
                   value={elStart}
                   onChange={(e) => setElStart(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-slate-200 text-xs focus:outline-none focus:border-purple-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-slate-200 text-xs focus:outline-none focus:border-purple-500 transition"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">End Date</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">End Date</label>
                 <input
                   type="datetime-local"
                   value={elEnd}
                   onChange={(e) => setElEnd(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-slate-200 text-xs focus:outline-none focus:border-purple-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-slate-200 text-xs focus:outline-none focus:border-purple-500 transition"
                 />
               </div>
 
@@ -322,21 +317,21 @@ export const AdminDashboard: React.FC = () => {
                 Schedule & Deploy Election
               </button>
             </form>
-          </div>
+          </Card>
 
           {/* Add Candidate Profile */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
+          <Card>
             <h3 className="font-extrabold text-white text-base mb-4 flex items-center gap-2">
-              <UserPlus className="h-5 w-5 text-indigo-400" /> Add Candidate to Election
+              <UserPlus className="h-5 w-5 text-teal-400" /> Add Candidate to Election
             </h3>
 
             <form onSubmit={handleAddCandidate} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Target Election</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">Target Election</label>
                 <select
                   value={selectedElection}
                   onChange={(e) => setSelectedElection(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-purple-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-purple-500 transition"
                 >
                   {elections.map((el) => (
                     <option key={el._id} value={el._id}>
@@ -347,107 +342,107 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Candidate Full Name</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">Candidate Full Name</label>
                 <input
                   type="text"
                   required
                   value={candName}
                   onChange={(e) => setCandName(e.target.value)}
                   placeholder="e.g. Vikram Singhania"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-purple-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-purple-500 transition"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Contested Position</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">Contested Position</label>
                 <input
                   type="text"
                   required
                   value={candPosition}
                   onChange={(e) => setCandPosition(e.target.value)}
                   placeholder="e.g. Food & Mess Secretary / Head Boy"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-purple-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-purple-500 transition"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Party / Slate / House</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">Party / Slate / House</label>
                 <input
                   type="text"
                   required
                   value={candParty}
                   onChange={(e) => setCandParty(e.target.value)}
                   placeholder="e.g. Student Nutrition Alliance / Sapphire House"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-purple-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-purple-500 transition"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Department / Wing & Symbol</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">Department & Symbol</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={candDept}
                     onChange={(e) => setCandDept(e.target.value)}
                     placeholder="e.g. Mechanical 2nd Year"
-                    className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-purple-500"
+                    className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-purple-500 transition"
                   />
                   <input
                     type="text"
                     value={candSymbol}
                     onChange={(e) => setCandSymbol(e.target.value)}
                     placeholder="🥗"
-                    className="w-14 text-center bg-slate-950 border border-slate-800 rounded-xl py-2.5 text-slate-200 text-lg focus:outline-none focus:border-purple-500"
+                    className="w-14 text-center bg-slate-950 border border-slate-800 rounded-xl py-2.5 text-slate-200 text-lg focus:outline-none focus:border-purple-500 transition"
                   />
                 </div>
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Manifesto Pledges</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">Manifesto Pledges</label>
                 <textarea
                   required
                   value={candMan}
                   onChange={(e) => setCandMan(e.target.value)}
                   placeholder="Commitment overview and student/employee promises..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 h-16 text-slate-200 text-sm focus:outline-none focus:border-purple-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 h-16 text-slate-200 text-sm focus:outline-none focus:border-purple-500 transition"
                 />
               </div>
 
               <button
                 type="submit"
-                className="sm:col-span-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl text-xs transition cursor-pointer shadow-md"
+                className="sm:col-span-2 bg-gradient-to-r from-teal-600 to-indigo-600 hover:from-teal-500 hover:to-indigo-500 text-white font-bold py-3 rounded-xl text-xs transition cursor-pointer shadow-md"
               >
                 Register Candidate Profile
               </button>
             </form>
-          </div>
+          </Card>
         </div>
 
         {/* Right Column: AI Security Alerts & Registered Credentials Manager */}
         <div className="lg:col-span-5 space-y-8">
           {/* AI Threat Alerts */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
+          <Card>
             <h3 className="font-extrabold text-white text-base mb-4 flex items-center gap-2">
-              <Cpu className="h-5 w-5 text-indigo-400" /> AI Anomaly Detection Engine
+              <Cpu className="h-5 w-5 text-teal-400" /> AI Anomaly Detection Engine
             </h3>
             <div className="space-y-3">
               {aiAlerts.map((alert) => (
-                <div key={alert.id} className="p-4 bg-slate-950/80 border border-red-500/30 rounded-2xl space-y-1">
+                <div key={alert.id} className="p-4 bg-slate-950/80 border border-rose-500/30 rounded-xl space-y-1">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-white">{alert.voter}</span>
-                    <span className="text-[10px] bg-red-950 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full font-bold font-mono">
+                    <span className="text-xs font-bold text-white font-mono">{alert.voter}</span>
+                    <Badge variant="danger" size="sm">
                       Risk: {alert.score * 100}%
-                    </span>
+                    </Badge>
                   </div>
                   <p className="text-[11px] text-slate-300 leading-tight">{alert.reason}</p>
                   <p className="text-[9px] text-slate-500 font-mono">IP: {alert.ip} • Threat: {alert.type}</p>
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
 
           {/* Multi-Domain Voter Directory */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
+          <Card>
             <h3 className="font-extrabold text-white text-base mb-4 flex items-center gap-2">
               <Users className="h-5 w-5 text-purple-400" /> Multi-Domain Voter Credentials
             </h3>
@@ -461,13 +456,13 @@ export const AdminDashboard: React.FC = () => {
                     </p>
                     <p className="text-[9px] text-purple-400">{u.organizationName || u.department || 'General'}</p>
                   </div>
-                  <span className="text-[9px] font-mono uppercase px-2 py-0.5 rounded-md bg-slate-950 border border-slate-800 text-slate-300">
+                  <Badge variant="neutral" size="sm">
                     {u.organizationType || u.role}
-                  </span>
+                  </Badge>
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
         </div>
 
       </div>

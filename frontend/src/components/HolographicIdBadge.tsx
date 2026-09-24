@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Fingerprint, QrCode, Cpu, Sparkles, Building, GraduationCap, Briefcase, School } from 'lucide-react';
+import Badge from './Badge';
+import { ShieldCheck, Fingerprint, QrCode, Cpu, Building, GraduationCap, Briefcase, School } from 'lucide-react';
 
 interface HolographicIdBadgeProps {
   user: {
@@ -56,9 +57,9 @@ export const HolographicIdBadge: React.FC<HolographicIdBadgeProps> = ({ user }) 
   // Domain Theme Configurations
   const themes = {
     college: {
-      accent: 'from-cyan-500 via-indigo-500 to-purple-600',
-      badgeBg: 'bg-cyan-950/60 border-cyan-500/30 text-cyan-300',
-      borderGlow: 'hover:shadow-cyan-500/20',
+      accent: 'from-teal-500 via-indigo-500 to-purple-600',
+      badgeVariant: 'teal' as const,
+      borderGlow: 'hover:shadow-purple-500/20',
       title: 'UNIVERSITY STUDENT CREDENTIAL',
       icon: GraduationCap,
       idLabel: 'STUDENT ROLL NO',
@@ -68,8 +69,8 @@ export const HolographicIdBadge: React.FC<HolographicIdBadgeProps> = ({ user }) 
       subtext: user.yearOrGrade || '3rd Year (Semester 6)'
     },
     company: {
-      accent: 'from-emerald-400 via-teal-500 to-cyan-600',
-      badgeBg: 'bg-emerald-950/60 border-emerald-500/30 text-emerald-300',
+      accent: 'from-emerald-400 via-teal-500 to-indigo-600',
+      badgeVariant: 'success' as const,
       borderGlow: 'hover:shadow-emerald-500/20',
       title: 'CORPORATE WORKPLACE PASS',
       icon: Briefcase,
@@ -80,8 +81,8 @@ export const HolographicIdBadge: React.FC<HolographicIdBadgeProps> = ({ user }) 
       subtext: user.yearOrGrade || 'Senior Engineer'
     },
     school: {
-      accent: 'from-amber-400 via-orange-500 to-rose-600',
-      badgeBg: 'bg-amber-950/60 border-amber-500/30 text-amber-300',
+      accent: 'from-amber-400 via-orange-500 to-purple-600',
+      badgeVariant: 'warning' as const,
       borderGlow: 'hover:shadow-amber-500/20',
       title: 'ACADEMY PREFECT COUNCIL ID',
       icon: School,
@@ -92,8 +93,8 @@ export const HolographicIdBadge: React.FC<HolographicIdBadgeProps> = ({ user }) 
       subtext: user.yearOrGrade || 'Grade 11 - Section A'
     },
     general: {
-      accent: 'from-purple-500 via-indigo-600 to-blue-600',
-      badgeBg: 'bg-purple-950/60 border-purple-500/30 text-purple-300',
+      accent: 'from-purple-500 via-indigo-600 to-teal-600',
+      badgeVariant: 'primary' as const,
       borderGlow: 'hover:shadow-purple-500/20',
       title: 'NATIONAL CIVIC VOTER IDENTITY',
       icon: Building,
@@ -117,17 +118,17 @@ export const HolographicIdBadge: React.FC<HolographicIdBadgeProps> = ({ user }) 
           transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
           transition: 'transform 0.15s ease-out'
         }}
-        className={`relative w-full max-w-md bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-slate-700/80 rounded-3xl p-6 sm:p-7 shadow-2xl transition-shadow duration-300 overflow-hidden cursor-pointer ${currentTheme.borderGlow}`}
+        className={`relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-7 shadow-2xl transition-shadow duration-300 overflow-hidden cursor-pointer ${currentTheme.borderGlow}`}
       >
         {/* Holographic dynamic rainbow sheen overlay */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-25 mix-blend-color-dodge transition-opacity duration-300"
+          className="absolute inset-0 pointer-events-none opacity-20 mix-blend-color-dodge transition-opacity duration-300"
           style={{
-            background: `radial-gradient(circle at ${glarePos.x}% ${glarePos.y}%, rgba(255,255,255,0.8) 0%, rgba(216,180,254,0.4) 25%, rgba(56,189,248,0.3) 50%, rgba(52,211,153,0) 80%)`
+            background: `radial-gradient(circle at ${glarePos.x}% ${glarePos.y}%, rgba(255,255,255,0.8) 0%, rgba(168,85,247,0.4) 25%, rgba(20,184,166,0.3) 50%, rgba(52,211,153,0) 80%)`
           }}
         />
 
-        {/* Diagonal metallic holographic foil lines */}
+        {/* Diagonal metallic foil pattern */}
         <div 
           className="absolute inset-0 pointer-events-none opacity-10"
           style={{
@@ -138,7 +139,7 @@ export const HolographicIdBadge: React.FC<HolographicIdBadgeProps> = ({ user }) 
         {/* Card Header */}
         <div className="relative z-10 flex justify-between items-start mb-6 gap-2">
           <div className="flex items-center gap-2.5">
-            <div className={`p-2 rounded-xl bg-gradient-to-br ${currentTheme.accent} text-white shadow-lg shadow-purple-500/20`}>
+            <div className={`p-2 rounded-xl bg-gradient-to-br ${currentTheme.accent} text-white shadow-lg`}>
               <DomainIcon className="h-5.5 w-5.5" />
             </div>
             <div>
@@ -151,10 +152,9 @@ export const HolographicIdBadge: React.FC<HolographicIdBadgeProps> = ({ user }) 
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-500/40 px-3 py-1 rounded-full text-xs font-mono text-emerald-400 font-bold shadow-inner shrink-0">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <Badge variant="success" dot size="sm" className="shrink-0">
             AI SECURED
-          </div>
+          </Badge>
         </div>
 
         {/* Cryptographic Smart Chip & RFID Sim */}
@@ -175,9 +175,9 @@ export const HolographicIdBadge: React.FC<HolographicIdBadgeProps> = ({ user }) 
 
           <div className="text-right">
             <p className="text-xs font-mono text-slate-500 uppercase tracking-widest mb-0.5">{currentTheme.idLabel}</p>
-            <p className="text-sm font-mono font-extrabold text-purple-300 tracking-wider bg-purple-950/60 px-2.5 py-1 rounded-md border border-purple-500/20">
+            <Badge variant={currentTheme.badgeVariant} size="sm">
               {currentTheme.defaultId}
-            </p>
+            </Badge>
           </div>
         </div>
 
@@ -193,7 +193,7 @@ export const HolographicIdBadge: React.FC<HolographicIdBadgeProps> = ({ user }) 
           </div>
 
           {/* Biometric Verification Badge */}
-          <div className="flex flex-col items-center justify-center p-2 rounded-2xl bg-slate-950/80 border border-slate-800 shadow-inner">
+          <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-950/80 border border-slate-800 shadow-inner">
             <Fingerprint className="h-8 w-8 text-emerald-400 animate-pulse mb-1.5" />
             <span className="text-[10px] font-mono text-emerald-300 uppercase font-bold tracking-tighter text-center leading-tight">
               BIOMETRICS 100% MATCH
@@ -204,12 +204,12 @@ export const HolographicIdBadge: React.FC<HolographicIdBadgeProps> = ({ user }) 
         {/* Card Footer: Wallet & Barcode */}
         <div className="relative z-10 border-t border-slate-800/80 pt-3.5 flex justify-between items-center text-xs text-slate-500 font-mono">
           <div className="flex items-center gap-1.5">
-            <ShieldCheck className="h-4 w-4 text-indigo-400" />
+            <ShieldCheck className="h-4 w-4 text-purple-400" />
             <span>CONTRACT: 0x7a3B...21Bf</span>
           </div>
 
           <div className="flex items-center gap-1 text-slate-400">
-            <QrCode className="h-4.5 w-4.5 text-purple-400" />
+            <QrCode className="h-4.5 w-4.5 text-teal-400" />
             <span>ETHEREUM LEDGER</span>
           </div>
         </div>

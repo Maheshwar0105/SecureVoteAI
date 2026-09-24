@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWeb3 } from '../context/Web3Context';
 import DemoSwitcherModal from './DemoSwitcherModal';
+import Badge from './Badge';
 import { ShieldCheck, LogOut, Wallet, Sparkles, GraduationCap, Briefcase, School, Building, Cpu } from 'lucide-react';
 
 interface NavbarProps {
@@ -25,27 +26,27 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout, onUserUpdate }) 
     switch (type) {
       case 'college':
         return (
-          <span className="hidden sm:inline-flex items-center gap-1 bg-cyan-950/70 border border-cyan-500/40 text-cyan-300 text-[11px] font-mono px-2.5 py-1 rounded-full">
-            <GraduationCap className="h-3.5 w-3.5" /> College ID
-          </span>
+          <Badge variant="info" icon={GraduationCap} className="hidden sm:inline-flex">
+            College ID
+          </Badge>
         );
       case 'company':
         return (
-          <span className="hidden sm:inline-flex items-center gap-1 bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 text-[11px] font-mono px-2.5 py-1 rounded-full">
-            <Briefcase className="h-3.5 w-3.5" /> Corporate Pass
-          </span>
+          <Badge variant="success" icon={Briefcase} className="hidden sm:inline-flex">
+            Corporate Pass
+          </Badge>
         );
       case 'school':
         return (
-          <span className="hidden sm:inline-flex items-center gap-1 bg-amber-950/70 border border-amber-500/40 text-amber-300 text-[11px] font-mono px-2.5 py-1 rounded-full">
-            <School className="h-3.5 w-3.5" /> School Prefect
-          </span>
+          <Badge variant="warning" icon={School} className="hidden sm:inline-flex">
+            School Prefect
+          </Badge>
         );
       default:
         return (
-          <span className="hidden sm:inline-flex items-center gap-1 bg-purple-950/70 border border-purple-500/40 text-purple-300 text-[11px] font-mono px-2.5 py-1 rounded-full">
-            <Building className="h-3.5 w-3.5" /> Civic Voter
-          </span>
+          <Badge variant="primary" icon={Building} className="hidden sm:inline-flex">
+            Civic Voter
+          </Badge>
         );
     }
   };
@@ -59,10 +60,10 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout, onUserUpdate }) 
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
               <div className="relative flex items-center justify-center">
                 <ShieldCheck className="h-8 w-8 text-purple-400 animate-pulse" />
-                <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-400" />
+                <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-teal-400" />
               </div>
               <div className="flex flex-col">
-                <span className="font-black text-xl tracking-wider bg-gradient-to-r from-purple-400 via-indigo-300 to-emerald-400 bg-clip-text text-transparent">
+                <span className="font-extrabold text-xl tracking-wider bg-gradient-to-r from-purple-400 via-indigo-300 to-teal-400 bg-clip-text text-transparent">
                   SecureVoteAI
                 </span>
                 <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest leading-none">
@@ -92,7 +93,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout, onUserUpdate }) 
               {/* Quick Persona Switcher for Presentation */}
               <button
                 onClick={() => setShowDemoModal(true)}
-                className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600/30 to-indigo-600/30 hover:from-purple-600/50 hover:to-indigo-600/50 border border-purple-500/40 text-purple-300 px-3 py-1.5 rounded-full text-xs font-bold transition shadow-sm cursor-pointer"
+                className="flex items-center gap-1.5 bg-purple-950/60 hover:bg-purple-900/60 border border-purple-500/40 text-purple-300 px-3 py-1.5 rounded-full text-xs font-bold font-mono transition shadow-sm cursor-pointer"
                 title="Switch College, Corporate, School, or Civic role"
               >
                 <Sparkles className="h-3.5 w-3.5 text-purple-400 animate-spin" />
@@ -103,22 +104,16 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout, onUserUpdate }) 
 
               {/* MetaMask Connection Button */}
               {account ? (
-                <div className="flex items-center gap-2 bg-indigo-950/60 border border-indigo-500/40 px-3 py-1.5 rounded-full shadow-inner">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-xs text-indigo-300 font-mono font-bold">
-                    {account.slice(0, 6)}...{account.slice(-4)}
-                  </span>
-                  <span className="hidden xl:inline text-[9px] font-mono bg-purple-900/80 text-purple-200 px-2 py-0.5 rounded-full">
-                    {networkName}
-                  </span>
-                </div>
+                <Badge variant="primary" dot className="font-mono">
+                  {account.slice(0, 6)}...{account.slice(-4)} {networkName && `(${networkName})`}
+                </Badge>
               ) : (
                 <button
                   onClick={handleWalletConnect}
                   disabled={isConnecting}
-                  className="hidden sm:flex items-center gap-2 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-200 px-3.5 py-1.5 rounded-full text-xs font-semibold transition active:scale-95 cursor-pointer"
+                  className="hidden sm:flex items-center gap-2 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-200 px-3.5 py-1.5 rounded-full text-xs font-semibold font-mono transition active:scale-95 cursor-pointer"
                 >
-                  <Wallet className="h-3.5 w-3.5 text-indigo-400" />
+                  <Wallet className="h-3.5 w-3.5 text-teal-400" />
                   {isConnecting ? 'Connecting...' : 'Connect MetaMask'}
                 </button>
               )}
@@ -134,7 +129,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout, onUserUpdate }) 
                   </div>
                   <button
                     onClick={onLogout}
-                    className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800/60 rounded-full transition cursor-pointer"
+                    className="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800/60 rounded-full transition cursor-pointer"
                     title="Logout"
                   >
                     <LogOut className="h-4.5 w-4.5" />

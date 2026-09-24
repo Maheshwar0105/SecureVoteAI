@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import FaceVerifier from '../components/FaceVerifier';
 import HolographicIdBadge from '../components/HolographicIdBadge';
+import Card from '../components/Card';
+import Badge from '../components/Badge';
 import {
   User,
   Mail,
@@ -15,7 +17,6 @@ import {
   School,
   ShieldCheck,
   AlertCircle,
-  Sparkles,
   ArrowRight
 } from 'lucide-react';
 
@@ -38,7 +39,6 @@ export const Register: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Handle Domain Switch presets
   const handleDomainChange = (type: 'college' | 'company' | 'school' | 'general') => {
     setOrgType(type);
     if (type === 'college') {
@@ -64,7 +64,7 @@ export const Register: React.FC = () => {
   const handleSubmitTrigger = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setShowFaceScan(true); // Open face verification scanner first
+    setShowFaceScan(true);
   };
 
   const handleFaceSuccess = async (faceEmbedding: number[]) => {
@@ -102,12 +102,11 @@ export const Register: React.FC = () => {
   return (
     <div className="flex-1 bg-slate-950 text-slate-100 py-12 px-4 sm:px-6 lg:px-12 w-full max-w-full">
       <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 bg-purple-950/60 border border-purple-500/30 px-5 py-2 rounded-full text-sm font-mono text-purple-300 mb-4">
-          <ShieldCheck className="h-4.5 w-4.5 text-purple-400" />
-          <span>CRYPTOGRAPHIC IDENTITY ENROLLMENT</span>
-        </div>
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">Create Voter Account</h1>
-        <p className="text-slate-400 text-sm sm:text-base mt-2 max-w-lg mx-auto leading-relaxed">
+        <Badge variant="primary" icon={ShieldCheck} className="mb-4">
+          CRYPTOGRAPHIC IDENTITY ENROLLMENT
+        </Badge>
+        <h1 className="heading-xl">Create Voter Account</h1>
+        <p className="body-base max-w-lg mx-auto mt-2">
           Select your institution category to configure domain-specific credentials & biometric security.
         </p>
       </div>
@@ -127,7 +126,7 @@ export const Register: React.FC = () => {
               key={tab.id}
               type="button"
               onClick={() => handleDomainChange(tab.id as any)}
-              className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl text-sm font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-2.5 px-5 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                 isActive
                   ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25 scale-105 border border-purple-400/40'
                   : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-850'
@@ -142,9 +141,9 @@ export const Register: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         {/* Left Form: Registration Fields */}
-        <div className="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl">
+        <Card className="lg:col-span-7 p-6 sm:p-8">
           {error && (
-            <div className="flex items-center gap-2.5 bg-red-950/40 border border-red-500/30 p-4 rounded-xl text-red-300 text-sm mb-6">
+            <div className="flex items-center gap-2.5 bg-rose-950/40 border border-rose-500/30 p-4 rounded-xl text-rose-300 text-sm mb-6 font-mono">
               <AlertCircle className="h-5 w-5 shrink-0" />
               <span>{error}</span>
             </div>
@@ -154,7 +153,7 @@ export const Register: React.FC = () => {
             {/* Full Name & Phone Number */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">Full Name</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">Full Name</label>
                 <div className="relative">
                   <User className="absolute left-3.5 top-4 h-5 w-5 text-slate-500" />
                   <input
@@ -163,13 +162,13 @@ export const Register: React.FC = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Aarav Sharma"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-11 pr-4 py-3.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition text-base"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-11 pr-4 py-3.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition text-sm"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">Mobile Phone (+ OTP)</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">Mobile Phone (+ OTP)</label>
                 <div className="relative">
                   <Phone className="absolute left-3.5 top-4 h-5 w-5 text-slate-500" />
                   <input
@@ -178,7 +177,7 @@ export const Register: React.FC = () => {
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     placeholder="+91 98765 43210"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-11 pr-4 py-3.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition text-base"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-11 pr-4 py-3.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition text-sm"
                   />
                 </div>
               </div>
@@ -187,7 +186,7 @@ export const Register: React.FC = () => {
             {/* Email & Password */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">Official Email</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">Official Email</label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-4 h-5 w-5 text-slate-500" />
                   <input
@@ -196,13 +195,13 @@ export const Register: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={orgType === 'college' ? 'student@college.edu' : (orgType === 'company' ? 'emp@company.com' : 'voter@domain.com')}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-11 pr-4 py-3.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition text-base"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-11 pr-4 py-3.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition text-sm"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">Password</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-4 h-5 w-5 text-slate-500" />
                   <input
@@ -211,7 +210,7 @@ export const Register: React.FC = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Min 6 characters"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-11 pr-4 py-3.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition text-base"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-11 pr-4 py-3.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition text-sm"
                   />
                 </div>
               </div>
@@ -222,7 +221,7 @@ export const Register: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* ID Field */}
                 <div>
-                  <label className="block text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">
                     {orgType === 'college' && 'Student Roll Number / PRN'}
                     {orgType === 'company' && 'Corporate Employee ID'}
                     {orgType === 'school' && 'Student Admission Number'}
@@ -247,14 +246,14 @@ export const Register: React.FC = () => {
                         orgType === 'company' ? 'EMP-NEX-4091' :
                         orgType === 'school' ? 'SCH-ADM-9941' : 'EPIC-MH-2026-8794'
                       }
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-11 pr-4 py-3.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition text-base font-mono"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-11 pr-4 py-3.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition text-sm font-mono"
                     />
                   </div>
                 </div>
 
                 {/* Institution Name */}
                 <div>
-                  <label className="block text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">
                     {orgType === 'college' && 'College / University Name'}
                     {orgType === 'company' && 'Company / Enterprise Name'}
                     {orgType === 'school' && 'School Name'}
@@ -266,7 +265,7 @@ export const Register: React.FC = () => {
                     value={organizationName}
                     onChange={(e) => setOrganizationName(e.target.value)}
                     placeholder="Institution Name"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-slate-200 focus:outline-none focus:border-purple-500 transition text-base"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-slate-200 focus:outline-none focus:border-purple-500 transition text-sm"
                   />
                 </div>
               </div>
@@ -274,7 +273,7 @@ export const Register: React.FC = () => {
               {/* Department & Year/House */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">
                     {orgType === 'college' && 'Department / Branch'}
                     {orgType === 'company' && 'Department / Committee'}
                     {orgType === 'school' && 'House System'}
@@ -284,7 +283,7 @@ export const Register: React.FC = () => {
                     <select
                       value={house}
                       onChange={(e) => setHouse(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-slate-200 focus:outline-none focus:border-purple-500 transition text-base"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-slate-200 focus:outline-none focus:border-purple-500 transition text-sm"
                     >
                       <option value="Ruby">Ruby House (Red)</option>
                       <option value="Sapphire">Sapphire House (Blue)</option>
@@ -301,13 +300,13 @@ export const Register: React.FC = () => {
                         orgType === 'college' ? 'e.g. Computer Science & AI' :
                         orgType === 'company' ? 'e.g. Cafeteria & Food Dept' : 'e.g. Metropolitan Ward 42'
                       }
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-slate-200 focus:outline-none focus:border-purple-500 transition text-base"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-slate-200 focus:outline-none focus:border-purple-500 transition text-sm"
                     />
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 font-mono">
                     {orgType === 'college' && 'Year / Semester'}
                     {orgType === 'company' && 'Designation / Grade'}
                     {orgType === 'school' && 'Class / Standard'}
@@ -323,7 +322,7 @@ export const Register: React.FC = () => {
                       orgType === 'company' ? 'e.g. Senior Staff' :
                       orgType === 'school' ? 'e.g. Grade 11 - Section A' : 'Resident Voter'
                     }
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-slate-200 focus:outline-none focus:border-purple-500 transition text-base"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-slate-200 focus:outline-none focus:border-purple-500 transition text-sm"
                   />
                 </div>
               </div>
@@ -332,7 +331,7 @@ export const Register: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 disabled:opacity-50 text-white font-bold py-4 rounded-xl transition cursor-pointer text-base shadow-lg shadow-purple-500/20 active:scale-[0.98] mt-5 flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-purple-600 via-indigo-600 to-teal-600 hover:from-purple-500 hover:to-teal-500 disabled:opacity-50 text-white font-bold py-4 rounded-xl transition cursor-pointer text-sm shadow-lg shadow-purple-500/20 active:scale-[0.98] mt-5 flex items-center justify-center gap-2"
             >
               <span>{isLoading ? 'Creating Web3 Credentials...' : 'Proceed to Biometric Verification'}</span>
               <ArrowRight className="h-5 w-5" />
@@ -345,7 +344,7 @@ export const Register: React.FC = () => {
               Login here
             </span>
           </p>
-        </div>
+        </Card>
 
         {/* Right Column: Live 3D Holographic Card Preview */}
         <div className="lg:col-span-5 flex flex-col items-center">
@@ -368,15 +367,15 @@ export const Register: React.FC = () => {
             }}
           />
 
-          <div className="mt-4 p-5 bg-slate-900/60 border border-slate-800 rounded-2xl w-full max-w-md text-sm text-slate-400 space-y-2.5">
-            <div className="flex items-center gap-2 text-emerald-400 font-bold">
+          <Card className="mt-4 p-5 w-full max-w-md">
+            <div className="flex items-center gap-2 text-emerald-400 font-bold mb-1">
               <ShieldCheck className="h-4.5 w-4.5" />
               <span>Tamper-Resistant Proof</span>
             </div>
-            <p className="text-xs sm:text-sm leading-relaxed text-slate-400">
+            <p className="text-xs text-slate-400 leading-relaxed">
               Your profile will be cryptographically bound to a unique smart contract transaction and verified using webcam facial embeddings.
             </p>
-          </div>
+          </Card>
         </div>
       </div>
 

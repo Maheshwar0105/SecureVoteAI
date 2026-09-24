@@ -1,20 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Badge from './Badge';
 import {
   GraduationCap,
   Briefcase,
   School,
   Building,
-  Calendar,
-  Clock,
-  CheckCircle,
-  Sparkles,
+  CheckCircle2,
   X,
   Vote,
   ArrowRight,
-  ShieldCheck,
-  Radio,
-  CheckCircle2
+  ShieldCheck
 } from 'lucide-react';
 
 interface VotingSelectionModalProps {
@@ -44,8 +40,8 @@ export const VotingSelectionModal: React.FC<VotingSelectionModalProps> = ({
       title: 'College / University Elections',
       icon: GraduationCap,
       badge: 'Student Council & Mess Voting',
-      color: 'from-cyan-500 to-indigo-600',
-      badgeColor: 'border-cyan-500/40 text-cyan-300 bg-cyan-950/60',
+      badgeVariant: 'teal' as const,
+      color: 'from-teal-500 to-indigo-600',
       description: 'Vote for Student Council President, Food & Mess Secretary, Cultural Head, and CSE Dept Rep.',
       subTopics: [
         'Student Council President & Vice President',
@@ -59,8 +55,8 @@ export const VotingSelectionModal: React.FC<VotingSelectionModalProps> = ({
       title: 'School Prefect Council',
       icon: School,
       badge: 'Head Boy & Head Girl Ballot',
+      badgeVariant: 'warning' as const,
       color: 'from-amber-500 to-rose-600',
-      badgeColor: 'border-amber-500/40 text-amber-300 bg-amber-950/60',
       description: 'Vote for Head Boy, Head Girl, Sports Captain, and House Captains (Ruby, Sapphire, Emerald).',
       subTopics: [
         'Head Boy & Head Girl (Grade 11 & 12)',
@@ -74,8 +70,8 @@ export const VotingSelectionModal: React.FC<VotingSelectionModalProps> = ({
       title: 'Corporate Workplace Governance',
       icon: Briefcase,
       badge: 'Food Dept & Workplace Board',
+      badgeVariant: 'success' as const,
       color: 'from-emerald-500 to-teal-600',
-      badgeColor: 'border-emerald-500/40 text-emerald-300 bg-emerald-950/60',
       description: 'Vote for Cafeteria Food Quality Lead, Menu Governance, and Workplace Welfare Committee.',
       subTopics: [
         'Cafeteria Menu & Food Quality Lead',
@@ -89,8 +85,8 @@ export const VotingSelectionModal: React.FC<VotingSelectionModalProps> = ({
       title: 'Official Civic Elections of India',
       icon: Building,
       badge: 'National & Legislative Assembly',
+      badgeVariant: 'primary' as const,
       color: 'from-purple-500 to-indigo-600',
-      badgeColor: 'border-purple-500/40 text-purple-300 bg-purple-950/60',
       description: 'Official voter poll with EPIC ID + SMS OTP verification for National Legislative Assembly.',
       subTopics: [
         'National Legislative Assembly (Metropolitan Ward 42)',
@@ -102,15 +98,14 @@ export const VotingSelectionModal: React.FC<VotingSelectionModalProps> = ({
   ];
 
   const timingOptions = [
-    { id: 'now', label: 'Vote Right Now (Live Ballot)', tag: '🟢 Live Poll Open', desc: 'Cast vote immediately on Sepolia smart contract' },
-    { id: 'today_evening', label: 'Today Evening (6:00 PM - 9:00 PM)', tag: '⏰ Scheduled Today', desc: 'Reserve voting slot for this evening' },
-    { id: 'tomorrow', label: 'Tomorrow Morning (10:00 AM)', tag: '📅 Scheduled Tomorrow', desc: 'Set automated voting reminder for tomorrow' },
-    { id: 'weekend', label: 'Upcoming Weekend (Saturday 11 AM)', tag: '🗓️ Weekend Slot', desc: 'Vote during designated weekend poll window' }
+    { id: 'now', label: 'Vote Right Now (Live Ballot)', tag: '🟢 Live Poll Open', tagVariant: 'success' as const, desc: 'Cast vote immediately on Sepolia smart contract' },
+    { id: 'today_evening', label: 'Today Evening (6:00 PM - 9:00 PM)', tag: '⏰ Scheduled Today', tagVariant: 'info' as const, desc: 'Reserve voting slot for this evening' },
+    { id: 'tomorrow', label: 'Tomorrow Morning (10:00 AM)', tag: '📅 Scheduled Tomorrow', tagVariant: 'warning' as const, desc: 'Set automated voting reminder for tomorrow' },
+    { id: 'weekend', label: 'Upcoming Weekend (Saturday 11 AM)', tag: '🗓️ Weekend Slot', tagVariant: 'primary' as const, desc: 'Vote during designated weekend poll window' }
   ];
 
   const activeDomainObj = domains.find((d) => d.id === selectedDomain) || domains[0];
 
-  // Find matching real election from backend if available
   const matchingElection = elections.find(
     (e) => e.type === selectedDomain || (selectedDomain === 'civic' && e.type === 'general')
   );
@@ -126,24 +121,23 @@ export const VotingSelectionModal: React.FC<VotingSelectionModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-lg animate-fade-in">
-      <div className="relative w-full max-w-4xl bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-7 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-7 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Glow backdrop */}
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none -z-10" />
 
         {/* Modal Header */}
         <div className="flex justify-between items-start mb-5 pb-4 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-600 via-indigo-600 to-cyan-600 text-white shadow-lg shadow-purple-500/20">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-600 via-indigo-600 to-teal-600 text-white shadow-lg">
               <Vote className="h-6 w-6" />
             </div>
             <div>
               <div className="flex items-center gap-2 mb-0.5">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-                <p className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest">
+                <Badge variant="success" dot size="sm">
                   POST-LOGIN ELECTION SELECTION GATEWAY
-                </p>
+                </Badge>
               </div>
-              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
                 What & When Do You Want to Vote For?
               </h2>
               <p className="text-xs text-slate-300">
@@ -164,9 +158,9 @@ export const VotingSelectionModal: React.FC<VotingSelectionModalProps> = ({
         <div className="space-y-6 overflow-y-auto pr-1 flex-1">
           {/* STEP 1: Select Institution / Voting Category */}
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2 font-mono">
               <span className="h-5 w-5 rounded-full bg-purple-600 text-white text-[11px] flex items-center justify-center font-mono">1</span>
-              <span>Select Voting Institution / Category (Kaha Vote Karna Hai?)</span>
+              <span>Select Voting Institution / Category</span>
             </label>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -182,7 +176,7 @@ export const VotingSelectionModal: React.FC<VotingSelectionModalProps> = ({
                     }}
                     className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
                       isSelected
-                        ? 'bg-slate-850 border-purple-500/80 shadow-lg shadow-purple-500/10 ring-1 ring-purple-500/50'
+                        ? 'bg-slate-900 border-purple-500 shadow-lg shadow-purple-500/10 ring-1 ring-purple-500/50'
                         : 'bg-slate-950/70 border-slate-800 hover:border-slate-700 hover:bg-slate-900/60'
                     }`}
                   >
@@ -190,9 +184,9 @@ export const VotingSelectionModal: React.FC<VotingSelectionModalProps> = ({
                       <div className={`p-2.5 rounded-xl bg-gradient-to-br ${dom.color} text-white shadow-md`}>
                         <Icon className="h-5 w-5" />
                       </div>
-                      <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border ${dom.badgeColor}`}>
+                      <Badge variant={dom.badgeVariant} size="sm">
                         {dom.badge}
-                      </span>
+                      </Badge>
                     </div>
 
                     <div>
@@ -212,8 +206,8 @@ export const VotingSelectionModal: React.FC<VotingSelectionModalProps> = ({
 
           {/* STEP 2: Select Specific Target Position / Topic */}
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2.5 flex items-center gap-2">
-              <span className="h-5 w-5 rounded-full bg-cyan-600 text-white text-[11px] flex items-center justify-center font-mono">2</span>
+            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2.5 flex items-center gap-2 font-mono">
+              <span className="h-5 w-5 rounded-full bg-teal-600 text-white text-[11px] flex items-center justify-center font-mono">2</span>
               <span>Select Specific Position / Ballot Topic</span>
             </label>
 
@@ -239,11 +233,11 @@ export const VotingSelectionModal: React.FC<VotingSelectionModalProps> = ({
             </div>
           </div>
 
-          {/* STEP 3: Select Timing Slot (Kab Vote Karna Hai?) */}
+          {/* STEP 3: Select Timing Slot */}
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2 font-mono">
               <span className="h-5 w-5 rounded-full bg-emerald-600 text-white text-[11px] flex items-center justify-center font-mono">3</span>
-              <span>Select Voting Time Slot (Kab Vote Karna Hai?)</span>
+              <span>Select Voting Time Slot</span>
             </label>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -265,11 +259,9 @@ export const VotingSelectionModal: React.FC<VotingSelectionModalProps> = ({
                       </div>
                       <p className="text-[10px] text-slate-400 font-mono">{opt.desc}</p>
                     </div>
-                    <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg border ${
-                      isSelected ? 'bg-emerald-950 border-emerald-500/40 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-400'
-                    }`}>
+                    <Badge variant={opt.tagVariant} size="sm">
                       {opt.tag}
-                    </span>
+                    </Badge>
                   </div>
                 );
               })}
@@ -294,7 +286,7 @@ export const VotingSelectionModal: React.FC<VotingSelectionModalProps> = ({
             
             <button
               onClick={handleConfirm}
-              className="w-1/2 sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white text-xs font-bold transition shadow-lg shadow-purple-500/20 cursor-pointer flex items-center justify-center gap-2 active:scale-95"
+              className="w-1/2 sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-teal-600 hover:from-purple-500 hover:to-teal-500 text-white text-xs font-bold transition shadow-lg shadow-purple-500/20 cursor-pointer flex items-center justify-center gap-2 active:scale-95"
             >
               <span>{selectedTiming === 'now' ? 'Proceed to Cast Vote Now' : 'Save Preferred Vote Slot'}</span>
               <ArrowRight className="h-4 w-4" />

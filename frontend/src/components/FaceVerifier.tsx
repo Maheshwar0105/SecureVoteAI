@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Camera, ShieldCheck, RefreshCw, XCircle, UserCheck, Play } from 'lucide-react';
+import Badge from './Badge';
+import { Camera, RefreshCw, XCircle, UserCheck, Play } from 'lucide-react';
 
 const getFaceEmbeddingForEmail = (email: string): number[] => {
   const embedding = [];
@@ -18,8 +19,8 @@ interface FaceVerifierProps {
   onVerificationSuccess: (faceEmbedding: number[]) => void;
   onClose: () => void;
   actionText?: string;
-  expectedEmbedding?: number[]; // If provided, matches against this instead of generating new
-  email?: string; // Optional email to generate deterministic face signature
+  expectedEmbedding?: number[];
+  email?: string;
 }
 
 export const FaceVerifier: React.FC<FaceVerifierProps> = ({
@@ -30,7 +31,6 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
   email
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [status, setStatus] = useState<'idle' | 'initializing' | 'scanning' | 'success' | 'failed'>('idle');
@@ -90,7 +90,6 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
         currentProgress += 5;
         setProgress(currentProgress);
         
-        // Dynamic Liveness Prompts to test anti-spoofing
         if (currentProgress === 25) {
           setInstruction('Liveness Check: Please blink once');
         } else if (currentProgress === 55) {
@@ -106,14 +105,11 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
   };
 
   const verifyFaceSignature = () => {
-    // Generate simulated face descriptor embedding (array of 128 float values)
     let simulatedEmbedding: number[];
 
     if (shouldMismatch) {
-      // Generate a completely random vector which won't match (orthogonal in high-dimensional space)
       simulatedEmbedding = Array.from({ length: 128 }, () => Math.random() * 2 - 1);
     } else {
-      // Generate a deterministic matching vector based on email if expectedEmbedding isn't provided
       if (expectedEmbedding) {
         simulatedEmbedding = [...expectedEmbedding];
       } else if (email) {
@@ -124,7 +120,6 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
     }
 
     if (expectedEmbedding) {
-      // Calculate Cosine Similarity to simulate deep-learning matching
       const dotProduct = simulatedEmbedding.reduce((sum, val, idx) => sum + val * expectedEmbedding[idx], 0);
       const mag1 = Math.sqrt(simulatedEmbedding.reduce((sum, val) => sum + val * val, 0));
       const mag2 = Math.sqrt(expectedEmbedding.reduce((sum, val) => sum + val * val, 0));
@@ -144,7 +139,6 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
         setInstruction(`Face matching failed. Biometric signature mismatch (${(similarity * 100).toFixed(1)}% confidence).`);
       }
     } else {
-      // Registration flow (save newly generated embedding)
       setStatus('success');
       setInstruction('Face registered successfully.');
       setTimeout(() => {
@@ -156,7 +150,7 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
 
   return (
     <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex justify-center items-center z-50 p-4" dir="ltr">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 relative overflow-hidden shadow-2xl">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 relative overflow-hidden shadow-2xl">
         
         {/* Scanner Header */}
         <div className="flex justify-between items-center mb-6">
@@ -164,7 +158,7 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
             <h3 className="font-extrabold text-white text-lg flex items-center gap-2">
               <Camera className="h-5 w-5 text-purple-400" /> Biometric Identity Check
             </h3>
-            <p className="text-[10px] text-slate-500 mt-0.5">Secure anti-spoofing facial recognition scanner</p>
+            <p className="text-[10px] text-slate-400 mt-0.5 font-mono">Secure anti-spoofing facial recognition scanner</p>
           </div>
           <button
             onClick={() => {
@@ -178,7 +172,7 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
         </div>
 
         {/* Video / Simulator Box */}
-        <div className="relative aspect-video bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center">
+        <div className="relative aspect-video bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
           {status !== 'failed' && !isSimulated && (
             <video
               ref={videoRef}
@@ -193,16 +187,11 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
           {isSimulated && status === 'scanning' && (
             <div className="absolute inset-0 flex items-center justify-center bg-slate-950">
               <svg className="w-40 h-40 text-purple-500/80 animate-pulse" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
-                {/* Face Shape */}
                 <path d="M50 15 C30 15 25 35 25 55 C25 75 35 85 50 85 C65 85 75 75 75 55 C75 35 70 15 50 15 Z" strokeDasharray="3 3" />
-                {/* Eyes */}
                 <circle cx="40" cy="45" r="3" fill="currentColor" />
                 <circle cx="60" cy="45" r="3" fill="currentColor" />
-                {/* Nose */}
                 <path d="M50 48 L50 60 L46 60" />
-                {/* Mouth */}
                 <path d="M42 70 Q50 74 58 70" />
-                {/* Target Guides */}
                 <path d="M20 20 L20 10 L30 10" stroke="#a855f7" strokeWidth="2" />
                 <path d="M80 20 L80 10 L70 10" stroke="#a855f7" strokeWidth="2" />
                 <path d="M20 80 L20 90 L30 90" stroke="#a855f7" strokeWidth="2" />
@@ -214,7 +203,7 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
 
           {/* Scanner Overlay Line */}
           {status === 'scanning' && (
-            <div className="absolute inset-0 border-2 border-purple-500/30 rounded-2xl pointer-events-none overflow-hidden">
+            <div className="absolute inset-0 border-2 border-purple-500/30 rounded-xl pointer-events-none overflow-hidden">
               <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-purple-500 to-transparent shadow-lg shadow-purple-500 animate-scan absolute top-0" />
             </div>
           )}
@@ -225,8 +214,8 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
 
           {status === 'failed' && (
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-              <XCircle className="h-10 w-10 text-red-500 mb-2" />
-              <p className="text-xs text-red-400 font-semibold">{instruction}</p>
+              <XCircle className="h-10 w-10 text-rose-500 mb-2" />
+              <p className="text-xs text-rose-400 font-semibold">{instruction}</p>
             </div>
           )}
 
@@ -239,8 +228,8 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
         </div>
 
         {/* Mismatch simulation toggle */}
-        <div className="mt-4 flex items-center justify-between bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl text-xs">
-          <span className="text-slate-400 font-medium">Simulate Unregistered Face (Biometric Mismatch)</span>
+        <div className="mt-4 flex items-center justify-between bg-slate-950/60 border border-slate-800 p-3.5 rounded-xl text-xs">
+          <span className="text-slate-400 font-medium">Simulate Unregistered Face Mismatch</span>
           <input
             type="checkbox"
             checked={shouldMismatch}
@@ -254,12 +243,12 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
           <div className="mt-6 space-y-2">
             <div className="flex justify-between items-center text-xs font-semibold">
               <span className="text-slate-400">Scanning Progress:</span>
-              <span className="text-purple-400">{progress}%</span>
+              <span className="text-purple-400 font-mono">{progress}%</span>
             </div>
             <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
               <div className="bg-gradient-to-r from-purple-500 to-indigo-500 h-full rounded-full transition-all duration-150" style={{ width: `${progress}%` }} />
             </div>
-            <p className="text-center text-xs text-indigo-300 font-medium py-1 animate-pulse">{instruction}</p>
+            <p className="text-center text-xs text-teal-300 font-medium py-1 animate-pulse">{instruction}</p>
           </div>
         )}
 
@@ -273,7 +262,7 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
             </button>
             <button
               onClick={startSimulation}
-              className="w-full bg-slate-800 hover:bg-slate-700 text-purple-400 border border-purple-500/20 font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full bg-slate-800 hover:bg-slate-750 text-purple-400 border border-purple-500/20 font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer"
             >
               <Play className="h-3.5 w-3.5" /> Run Biometric Simulation (Demo Mode)
             </button>
@@ -283,4 +272,5 @@ export const FaceVerifier: React.FC<FaceVerifierProps> = ({
     </div>
   );
 };
+
 export default FaceVerifier;

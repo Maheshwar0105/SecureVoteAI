@@ -41,11 +41,10 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/elections', require('./routes/elections'));
 app.use('/api/candidates', require('./routes/candidates'));
+app.use('/api/voting', require('./routes/voting'));
+app.use('/api/results', require('./routes/results'));
+app.use('/api/fraud', require('./routes/fraud'));
 
-// Remaining skeletons for upcoming milestones
-app.use('/api/voting', (req, res) => res.status(501).json({ message: 'Not Implemented (Milestone 6)' }));
-app.use('/api/results', (req, res) => res.status(501).json({ message: 'Not Implemented (Milestone 6)' }));
-app.use('/api/fraud', (req, res) => res.status(501).json({ message: 'Not Implemented (Milestone 7)' }));
 
 
 // Error Handler Middleware
@@ -54,9 +53,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
 
 module.exports = app;

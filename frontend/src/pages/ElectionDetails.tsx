@@ -4,19 +4,13 @@ import api from '../services/api';
 import { useWeb3 } from '../context/Web3Context';
 import { castVoteOnChain } from '../services/web3Service';
 import FaceVerifier from '../components/FaceVerifier';
+import Card from '../components/Card';
+import Badge from '../components/Badge';
 import {
-  Calendar,
-  User,
   CheckCircle2,
-  ShieldAlert,
   Award,
   FileText,
   Vote,
-  Sparkles,
-  GraduationCap,
-  Briefcase,
-  School,
-  Building,
   Check,
   Cpu
 } from 'lucide-react';
@@ -24,11 +18,10 @@ import {
 export const ElectionDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { account, isConnected, connectWallet, networkName } = useWeb3();
+  const { account, connectWallet, networkName } = useWeb3();
 
   const [election, setElection] = useState<any>(null);
   const [candidates, setCandidates] = useState<any[]>([]);
-  // Position-based selection map: { [positionName]: candidateId }
   const [selectedVotes, setSelectedVotes] = useState<{ [position: string]: string }>({});
   const [activePositionTab, setActivePositionTab] = useState<string>('');
 
@@ -53,7 +46,6 @@ export const ElectionDetails: React.FC = () => {
       setElection(res.data.election);
       setCandidates(res.data.candidates);
 
-      // Extract unique contested positions
       const positions = res.data.election.contestedPositions || ['Representative'];
       if (positions.length > 0) {
         setActivePositionTab(positions[0]);
@@ -85,7 +77,6 @@ export const ElectionDetails: React.FC = () => {
   };
 
   const handleVoteSubmit = async () => {
-    const contested = election?.contestedPositions || ['Representative'];
     const votedCount = Object.keys(selectedVotes).length;
 
     if (votedCount === 0) {
@@ -104,7 +95,6 @@ export const ElectionDetails: React.FC = () => {
 
     let activeAccount = account;
     if (!activeAccount) {
-      // Prompt MetaMask connection if not connected
       activeAccount = await connectWallet();
     }
 
@@ -114,7 +104,6 @@ export const ElectionDetails: React.FC = () => {
       let finalTxHash: string;
       let isRealBlockchainTx = false;
 
-      // Convert election & candidate IDs to numeric parameters for VotingSystem.sol
       const numericElectionId = parseInt(id || '1', 10) || 1;
       const numericCandidateId = candidates.findIndex(c => c._id === chosenCandidateId) + 1 || 1;
 
@@ -129,15 +118,12 @@ export const ElectionDetails: React.FC = () => {
           if (contractErr.code === 4001 || contractErr.message?.includes('user rejected')) {
             throw new Error('MetaMask transaction was rejected by user.');
           }
-          // Fallback transaction hash generation with explicit notification
           finalTxHash = '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
         }
       } else {
-        // Fallback for non-MetaMask environments
         finalTxHash = '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
       }
 
-      // Save vote audit log on backend
       await api.post('/voting', {
         electionId: id,
         candidateId: chosenCandidateId,
@@ -161,7 +147,6 @@ export const ElectionDetails: React.FC = () => {
     }
   };
 
-
   if (isLoading) {
     return (
       <div className="flex-1 flex justify-center items-center py-20">
@@ -182,7 +167,6 @@ export const ElectionDetails: React.FC = () => {
     ? election.contestedPositions
     : ['Representative'];
 
-  // Filter candidates for the currently selected position
   const currentCandidates = candidates.filter((c) => {
     if (positions.length <= 1) return true;
     return c.position === activePositionTab || !c.position || c.position === 'Candidate';
@@ -191,41 +175,41 @@ export const ElectionDetails: React.FC = () => {
   return (
     <div className="flex-1 bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-12 w-full max-w-full">
       {/* Top Banner */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 sm:p-8 mb-8 backdrop-blur-md">
+      <Card className="p-6 sm:p-8 mb-8">
         <div className="flex flex-wrap justify-between items-start gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-purple-950 border border-purple-500/30 text-purple-300">
+              <Badge variant="primary" size="sm">
                 {election.category || 'General Election'}
-              </span>
-              <span className="text-[10px] font-mono font-bold uppercase px-3 py-1 rounded-full bg-emerald-950 border border-emerald-500/30 text-emerald-400">
+              </Badge>
+              <Badge variant="success" dot size="sm">
                 {election.status}
-              </span>
+              </Badge>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
+            <h1 className="heading-lg">
               {election.title}
             </h1>
-            <p className="text-slate-400 text-xs sm:text-sm mt-2 max-w-3xl leading-relaxed">
+            <p className="body-base mt-2 max-w-3xl">
               {election.description}
             </p>
           </div>
 
-          <div className="bg-slate-950/80 border border-slate-800 p-4 rounded-2xl text-xs font-mono space-y-1">
+          <div className="bg-slate-950/80 border border-slate-800 p-4 rounded-xl text-xs font-mono space-y-1">
             <p className="text-slate-500 uppercase text-[10px]">Institution</p>
             <p className="text-slate-200 font-bold">{election.organizationName || 'SecureVote AI'}</p>
             <p className="text-slate-500 uppercase text-[10px] pt-1">Election Ends</p>
             <p className="text-purple-400 font-bold">{new Date(election.endTime).toLocaleDateString()}</p>
           </div>
         </div>
-      </div>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Guidelines & Positions Switcher */}
         <div className="lg:col-span-4 space-y-6">
           {/* Contested Positions Navigation */}
           {positions.length > 1 && (
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
-              <h3 className="font-extrabold text-white text-sm mb-4 uppercase tracking-wider text-purple-300 flex items-center gap-2">
+            <Card>
+              <h3 className="font-extrabold text-white text-sm mb-4 uppercase tracking-wider text-purple-300 flex items-center gap-2 font-mono">
                 <Vote className="h-4 w-4" /> Contested Portfolios
               </h3>
               <div className="space-y-2">
@@ -236,7 +220,7 @@ export const ElectionDetails: React.FC = () => {
                     <button
                       key={pos}
                       onClick={() => setActivePositionTab(pos)}
-                      className={`w-full text-left p-3 rounded-2xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${
+                      className={`w-full text-left p-3 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${
                         isActive
                           ? 'bg-purple-600 text-white shadow-md'
                           : 'bg-slate-950 border border-slate-800 text-slate-300 hover:border-slate-700'
@@ -252,12 +236,12 @@ export const ElectionDetails: React.FC = () => {
                   );
                 })}
               </div>
-            </div>
+            </Card>
           )}
 
           {/* Rules & Security Guidelines */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3">
-            <h3 className="font-extrabold text-white text-sm uppercase tracking-wider text-slate-300 flex items-center gap-2">
+          <Card className="space-y-3">
+            <h3 className="font-extrabold text-white text-sm uppercase tracking-wider text-slate-300 flex items-center gap-2 font-mono">
               <FileText className="h-4 w-4 text-purple-400" /> Electoral Guidelines
             </h3>
             <ul className="space-y-2.5 text-xs text-slate-400">
@@ -274,7 +258,7 @@ export const ElectionDetails: React.FC = () => {
                 <span>Votes are cryptographically recorded into Ethereum smart contracts.</span>
               </li>
             </ul>
-          </div>
+          </Card>
         </div>
 
         {/* Right Column: Candidate Ballot & Cast Action */}
@@ -291,26 +275,23 @@ export const ElectionDetails: React.FC = () => {
             </div>
 
             {currentCandidates.length === 0 ? (
-              <div className="bg-slate-900/60 border border-slate-800 p-8 rounded-3xl text-center text-slate-400 text-xs">
+              <Card className="p-8 text-center text-slate-400 text-xs">
                 No candidates registered under this portfolio.
-              </div>
+              </Card>
             ) : (
               <div className="space-y-4">
                 {currentCandidates.map((candidate) => {
                   const isChosen = selectedVotes[candidate.position || activePositionTab] === candidate._id;
                   return (
-                    <div
+                    <Card
                       key={candidate._id}
+                      interactive
                       onClick={() => handleSelectCandidate(candidate.position || activePositionTab, candidate._id)}
-                      className={`p-6 border rounded-3xl cursor-pointer transition-all duration-200 ${
-                        isChosen
-                          ? 'bg-purple-950/30 border-purple-500 shadow-lg shadow-purple-500/10'
-                          : 'bg-slate-900 border-slate-800 hover:border-slate-700'
-                      }`}
+                      className={isChosen ? 'bg-purple-950/30 border-purple-500 shadow-lg shadow-purple-500/10' : ''}
                     >
                       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                         <div className="flex items-center gap-3.5">
-                          <div className="h-12 w-12 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-2xl shadow-inner shrink-0">
+                          <div className="h-12 w-12 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-2xl shadow-inner shrink-0">
                             {candidate.symbolBadge || '🛡️'}
                           </div>
                           <div>
@@ -319,9 +300,9 @@ export const ElectionDetails: React.FC = () => {
                                 {candidate.name}
                               </h4>
                               {isChosen && (
-                                <span className="bg-emerald-950 border border-emerald-500/40 text-emerald-400 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full">
+                                <Badge variant="success" size="sm">
                                   SELECTED
-                                </span>
+                                </Badge>
                               )}
                             </div>
                             <p className="text-xs text-purple-300 font-semibold">
@@ -342,25 +323,23 @@ export const ElectionDetails: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Bio & Manifesto */}
                       <p className="text-xs text-slate-300 leading-relaxed mb-3">
                         {candidate.manifesto || candidate.biography}
                       </p>
 
-                      {/* Promises bullets */}
                       {candidate.promises && candidate.promises.length > 0 && (
                         <div className="pt-2 border-t border-slate-800/60 flex flex-wrap gap-2">
                           {candidate.promises.map((promise: string, pIdx: number) => (
                             <span
                               key={pIdx}
-                              className="text-[10px] bg-slate-950 border border-slate-850 text-slate-400 px-2.5 py-1 rounded-lg"
+                              className="text-[10px] bg-slate-950 border border-slate-800 text-slate-400 px-2.5 py-1 rounded-lg font-mono"
                             >
                               ✓ {promise}
                             </span>
                           ))}
                         </div>
                       )}
-                    </div>
+                    </Card>
                   );
                 })}
               </div>
@@ -368,18 +347,18 @@ export const ElectionDetails: React.FC = () => {
           </div>
 
           {/* Voting Action & Biometric Check Panel */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
+          <Card className="space-y-4">
             <h3 className="font-extrabold text-white text-base flex items-center gap-2">
-              <Award className="h-5 w-5 text-indigo-400" /> Biometric Authentication & Ledger Broadcast
+              <Award className="h-5 w-5 text-teal-400" /> Biometric Authentication & Ledger Broadcast
             </h3>
 
             {message && (
-              <div className="text-xs bg-emerald-950/50 border border-emerald-500/40 p-4 rounded-2xl text-emerald-300 leading-relaxed font-mono">
+              <div className="text-xs bg-emerald-950/50 border border-emerald-500/40 p-4 rounded-xl text-emerald-300 leading-relaxed font-mono">
                 {message}
               </div>
             )}
             {error && (
-              <div className="text-xs bg-red-950/50 border border-red-500/40 p-4 rounded-2xl text-red-300 font-mono">
+              <div className="text-xs bg-rose-950/50 border border-rose-500/40 p-4 rounded-xl text-rose-300 font-mono">
                 {error}
               </div>
             )}
@@ -389,7 +368,7 @@ export const ElectionDetails: React.FC = () => {
                 <button
                   onClick={handleFaceVerification}
                   disabled={showFaceScan}
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl text-xs sm:text-sm transition cursor-pointer shadow-lg shadow-indigo-500/20 active:scale-98 flex items-center justify-center gap-2"
+                  className="flex-1 bg-gradient-to-r from-teal-600 to-indigo-600 hover:from-teal-500 hover:to-indigo-500 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl text-xs sm:text-sm transition cursor-pointer shadow-lg shadow-teal-500/20 active:scale-98 flex items-center justify-center gap-2"
                 >
                   <Cpu className="h-4 w-4" />
                   <span>Verify Live Biometrics</span>
@@ -405,7 +384,7 @@ export const ElectionDetails: React.FC = () => {
                 </button>
               )}
             </div>
-          </div>
+          </Card>
         </div>
       </div>
 

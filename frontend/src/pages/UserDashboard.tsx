@@ -5,27 +5,15 @@ import api from '../services/api';
 import HolographicIdBadge from '../components/HolographicIdBadge';
 import DemoSwitcherModal from '../components/DemoSwitcherModal';
 import VotingSelectionModal from '../components/VotingSelectionModal';
+import Card from '../components/Card';
+import Badge from '../components/Badge';
 import {
-  Wallet,
-  Calendar,
   Vote,
-  FileCheck,
   CheckCircle2,
-  User,
-  ShieldCheck,
-  GraduationCap,
-  Briefcase,
-  School,
-  Building,
   Sparkles,
-  Layers,
-  ArrowRight,
-  Activity,
+  ShieldCheck,
   Cpu,
-  Lock,
-  EyeOff,
   Database,
-  ExternalLink,
   ChevronRight
 } from 'lucide-react';
 
@@ -49,7 +37,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
   useEffect(() => {
     fetchDashboardData(selectedFilter);
 
-    // Check if user just logged in and trigger post-login election selection modal automatically
     const justLoggedIn = sessionStorage.getItem('justLoggedIn');
     if (justLoggedIn) {
       setShowVotingSelectionModal(true);
@@ -105,17 +92,16 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
   return (
     <div className="flex-1 bg-slate-950 text-slate-100 py-8 px-4 sm:px-6 lg:px-12 w-full max-w-full space-y-8">
       
-      {/* Top Banner Artwork & Dashboard Headline */}
-      <div className="relative rounded-3xl overflow-hidden border border-slate-800 bg-slate-900/90 shadow-2xl backdrop-blur-xl p-6 sm:p-8">
+      {/* Top Banner & Dashboard Headline */}
+      <Card className="p-6 sm:p-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-6 border-b border-slate-800">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
-              <p className="text-xs font-mono font-bold tracking-widest text-emerald-400 uppercase">
+              <Badge variant="success" dot size="sm">
                 AI-DRIVEN, BLOCKCHAIN-SECURED VOTING SUITE
-              </p>
+              </Badge>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-black text-white font-mono tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-white font-mono tracking-tight">
               DASHBOARD: ENROLLED VOTER [{user?.name?.toUpperCase() || 'ANONYMOUS'}]
             </h1>
             <p className="text-xs text-slate-400 mt-1 font-mono">
@@ -126,7 +112,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => setShowVotingSelectionModal(true)}
-              className="bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl transition cursor-pointer flex items-center gap-2 shadow-lg shadow-cyan-500/20 active:scale-95 border border-cyan-400/30"
+              className="bg-gradient-to-r from-teal-600 via-indigo-600 to-purple-600 hover:from-teal-500 hover:to-purple-500 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl transition cursor-pointer flex items-center gap-2 shadow-lg shadow-teal-500/20 active:scale-95 border border-teal-400/30"
             >
               <Vote className="h-4 w-4" />
               <span>🎯 Select What & When To Vote</span>
@@ -134,7 +120,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
 
             <button
               onClick={() => setShowDemoModal(true)}
-              className="bg-slate-900 border border-slate-750 hover:bg-slate-850 text-slate-300 text-xs font-bold px-4 py-2.5 rounded-xl transition cursor-pointer flex items-center gap-2 active:scale-95"
+              className="bg-slate-900 border border-slate-700 hover:bg-slate-850 text-slate-300 text-xs font-bold px-4 py-2.5 rounded-xl transition cursor-pointer flex items-center gap-2 active:scale-95"
             >
               <Sparkles className="h-4 w-4 text-purple-400" />
               <span>Switch Presentation Persona</span>
@@ -142,19 +128,19 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
           </div>
         </div>
 
-        {/* 3-Column Core Dashboard HUD (Matching Concept Artwork) */}
+        {/* 3-Column Core Dashboard HUD */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
           
           {/* Column 1: My Active Elections */}
-          <div className="md:col-span-4 bg-slate-950/80 border border-slate-800/80 rounded-2xl p-5 flex flex-col justify-between shadow-inner">
+          <div className="md:col-span-4 bg-slate-950/80 border border-slate-800 rounded-xl p-5 flex flex-col justify-between shadow-inner">
             <div>
               <div className="flex justify-between items-center mb-3">
                 <h3 className="font-extrabold text-white text-sm uppercase tracking-wider flex items-center gap-2">
                   <Vote className="h-4 w-4 text-purple-400" /> My Active Elections
                 </h3>
-                <span className="text-[10px] font-mono bg-purple-950 border border-purple-500/30 text-purple-300 px-2 py-0.5 rounded-md">
+                <Badge variant="primary" size="sm">
                   {elections.length} Open
-                </span>
+                </Badge>
               </div>
 
               {/* Elections List */}
@@ -184,7 +170,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
             </div>
 
             {/* View All Button */}
-            <div className="pt-3 mt-3 border-t border-slate-850 flex justify-between items-center text-[10px] font-mono text-slate-400">
+            <div className="pt-3 mt-3 border-t border-slate-800 flex justify-between items-center text-[10px] font-mono text-slate-400">
               <span>LEDGER SYNC: REAL-TIME</span>
               <button
                 onClick={() => setSelectedFilter('all')}
@@ -198,7 +184,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
           {/* Column 2: Voter Profile & AI Anomaly Overview */}
           <div className="md:col-span-4 space-y-4">
             {/* Voter Profile Box */}
-            <div className="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-4 flex items-center justify-between shadow-inner">
+            <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex items-center justify-between shadow-inner">
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-extrabold text-lg shadow-md border border-purple-400/30">
@@ -215,17 +201,16 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
                 </div>
               </div>
 
-              <div className="bg-emerald-950/90 border border-emerald-500/40 px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-md">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                <span className="text-xs font-mono font-bold text-emerald-300 uppercase">Verified</span>
-              </div>
+              <Badge variant="success" size="sm">
+                Verified
+              </Badge>
             </div>
 
             {/* AI Anomaly Overview Box */}
-            <div className="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-4 shadow-inner space-y-3">
+            <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 shadow-inner space-y-3">
               <div className="flex justify-between items-center">
                 <h4 className="text-xs font-mono font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5">
-                  <Cpu className="h-4 w-4 text-cyan-400" /> AI ANOMALY OVERVIEW
+                  <Cpu className="h-4 w-4 text-teal-400" /> AI ANOMALY OVERVIEW
                 </h4>
                 <span className="text-[9px] font-mono text-slate-400">ISOLATION FOREST</span>
               </div>
@@ -246,7 +231,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
           </div>
 
           {/* Column 3: Vote History & Cryptographic Telemetry */}
-          <div className="md:col-span-4 bg-slate-950/80 border border-slate-800/80 rounded-2xl p-5 flex flex-col justify-between shadow-inner">
+          <div className="md:col-span-4 bg-slate-950/80 border border-slate-800 rounded-xl p-5 flex flex-col justify-between shadow-inner">
             <div>
               <div className="flex justify-between items-center mb-3">
                 <h3 className="font-extrabold text-white text-sm uppercase tracking-wider flex items-center gap-2">
@@ -261,8 +246,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
                   <p className="text-lg font-black text-white font-mono mt-0.5">19</p>
                 </div>
                 <div className="p-2.5 bg-slate-900 border border-slate-800 rounded-xl">
-                  <p className="text-[9px] font-mono text-cyan-400 uppercase">Anonymized</p>
-                  <p className="text-lg font-black text-cyan-300 font-mono mt-0.5">2</p>
+                  <p className="text-[9px] font-mono text-teal-400 uppercase">Anonymized</p>
+                  <p className="text-lg font-black text-teal-300 font-mono mt-0.5">2</p>
                 </div>
                 <div className="p-2.5 bg-slate-900 border border-slate-800 rounded-xl">
                   <p className="text-[9px] font-mono text-purple-400 uppercase">Encrypted</p>
@@ -270,14 +255,13 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
                 </div>
               </div>
 
-              {/* Security Annotation Checklist */}
               <div className="space-y-1.5 text-[10px] font-mono text-slate-400">
                 <div className="flex items-center gap-2 text-slate-300">
                   <span className="h-1.5 w-1.5 rounded-full bg-purple-400" />
                   <span>Blockchain Smart Contract Verified</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-300">
-                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-teal-400" />
                   <span>AI Monitoring Engine Active (DeepScan)</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-300">
@@ -287,8 +271,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
               </div>
             </div>
 
-            {/* Wallet binding status */}
-            <div className="pt-3 mt-3 border-t border-slate-850 flex justify-between items-center text-[10px] font-mono">
+            <div className="pt-3 mt-3 border-t border-slate-800 flex justify-between items-center text-[10px] font-mono">
               <span className="text-slate-500">WALLET ADDRESS</span>
               {user?.isWalletBound ? (
                 <span className="text-emerald-400 font-bold truncate max-w-[120px]">{user.walletAddress}</span>
@@ -302,14 +285,13 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
 
         </div>
 
-        {/* Bottom Interactive Holographic Flow Section (Matching Concept Artwork) */}
-        <div className="mt-8 pt-8 border-t border-slate-800/80">
+        {/* Bottom Pipeline */}
+        <div className="mt-8 pt-8 border-t border-slate-800">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div>
-              <div className="inline-flex items-center gap-1.5 bg-indigo-950/70 border border-indigo-500/30 px-3 py-1 rounded-full text-[10px] font-mono text-indigo-300 mb-1">
-                <ShieldCheck className="h-3.5 w-3.5 text-indigo-400" />
-                <span>DECENTRALIZED CONSENSUS PIPELINE</span>
-              </div>
+              <Badge variant="teal" icon={ShieldCheck} className="mb-1">
+                DECENTRALIZED CONSENSUS PIPELINE
+              </Badge>
               <h3 className="text-lg font-bold text-white">
                 Interactive Blockchain & Smart Contract Execution Table
               </h3>
@@ -318,19 +300,20 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
               </p>
             </div>
 
-            {/* Concept Artwork Image Display */}
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-950 border border-emerald-500/30 px-3 py-1 rounded-full">
-                VOTE CONFIRMED ON LEDGER
-              </span>
-            </div>
+            <Badge variant="success" dot>
+              VOTE CONFIRMED ON LEDGER
+            </Badge>
           </div>
 
-          {/* Interactive Graphic Artwork Container */}
           <div className="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 shadow-2xl group">
             <img 
               src="/voter_holo_dash.png" 
               alt="Holographic Voting Control Table" 
+              onError={(e) => {
+                const target = e.currentTarget;
+                target.onerror = null;
+                target.src = '/secure_voting_command.png';
+              }}
               className="w-full h-auto object-cover rounded-2xl max-h-[380px] transition duration-500 group-hover:scale-101"
             />
             <div className="absolute bottom-4 left-4 right-4 bg-slate-950/90 border border-slate-800 p-4 rounded-xl backdrop-blur-md flex flex-wrap justify-between items-center gap-4 text-xs font-mono text-slate-300">
@@ -346,20 +329,20 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
           </div>
         </div>
 
-      </div>
+      </Card>
 
       {/* 3D Holographic Identity Pass Section */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 sm:p-8 backdrop-blur-md">
+      <Card className="p-6 sm:p-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <h3 className="text-lg font-extrabold text-white flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-purple-400" />
               <span>Your Verified 3D Holographic Pass</span>
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">Move your mouse over the card to inspect cryptographic micro-engraving.</p>
           </div>
 
-          <div className="flex flex-wrap gap-1.5 bg-slate-950 border border-slate-800 p-1 rounded-2xl">
+          <div className="flex flex-wrap gap-1.5 bg-slate-950 border border-slate-800 p-1 rounded-xl">
             {[
               { id: 'all', label: 'All' },
               { id: 'college', label: 'College' },
@@ -370,7 +353,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
               <button
                 key={tab.id}
                 onClick={() => setSelectedFilter(tab.id as any)}
-                className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
                   selectedFilter === tab.id
                     ? 'bg-purple-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-white'
@@ -383,7 +366,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
         </div>
 
         <HolographicIdBadge user={user} />
-      </div>
+      </Card>
 
       <DemoSwitcherModal
         isOpen={showDemoModal}
@@ -398,7 +381,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
         isOpen={showVotingSelectionModal}
         onClose={() => setShowVotingSelectionModal(false)}
         elections={elections}
-        onSelectSelection={(domain, timing, electionId) => {
+        onSelectSelection={(domain) => {
           if (domain === 'civic') {
             setSelectedFilter('general');
           } else {

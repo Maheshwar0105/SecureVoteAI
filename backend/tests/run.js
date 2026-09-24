@@ -57,11 +57,14 @@ async function runTests() {
     assert.ok(res.headers['x-xss-protection'] || res.headers['content-security-policy']);
   });
 
-  // 4. Test API skeleton fallback route check
-  await test('GET /api/voting - Unimplemented Milestone 6 Routes Check', async () => {
-    await request(app)
-      .get('/api/voting')
-      .expect(501);
+  // 4. Test API active fraud telemetry route check
+  await test('GET /api/fraud - AI Fraud Risk & Telemetry Check', async () => {
+    const res = await request(app)
+      .get('/api/fraud')
+      .expect('Content-Type', /json/)
+      .expect(200);
+
+    assert.ok(res.body.systemIntegrity);
   });
 
   console.log(`\nTest Summary: ${passed} passed, ${failed} failed`);
