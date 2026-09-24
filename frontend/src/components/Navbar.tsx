@@ -11,7 +11,7 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ user, onLogout, onUserUpdate }) => {
-  const { account, connectWallet, isConnecting } = useWeb3();
+  const { account, connectWallet, isConnecting, networkName } = useWeb3();
   const navigate = useNavigate();
   const [showDemoModal, setShowDemoModal] = useState(false);
 
@@ -104,9 +104,12 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout, onUserUpdate }) 
               {/* MetaMask Connection Button */}
               {account ? (
                 <div className="flex items-center gap-2 bg-indigo-950/60 border border-indigo-500/40 px-3 py-1.5 rounded-full shadow-inner">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                  <span className="text-xs text-indigo-300 font-mono">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-xs text-indigo-300 font-mono font-bold">
                     {account.slice(0, 6)}...{account.slice(-4)}
+                  </span>
+                  <span className="hidden xl:inline text-[9px] font-mono bg-purple-900/80 text-purple-200 px-2 py-0.5 rounded-full">
+                    {networkName}
                   </span>
                 </div>
               ) : (
@@ -116,7 +119,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout, onUserUpdate }) 
                   className="hidden sm:flex items-center gap-2 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-200 px-3.5 py-1.5 rounded-full text-xs font-semibold transition active:scale-95 cursor-pointer"
                 >
                   <Wallet className="h-3.5 w-3.5 text-indigo-400" />
-                  {isConnecting ? 'Syncing...' : 'Web3 Wallet'}
+                  {isConnecting ? 'Connecting...' : 'Connect MetaMask'}
                 </button>
               )}
 

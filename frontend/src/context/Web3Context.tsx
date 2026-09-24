@@ -4,6 +4,7 @@ import { ethers } from 'ethers';
 interface Web3ContextType {
   account: string | null;
   chainId: string | null;
+  networkName: string;
   isConnected: boolean;
   isConnecting: boolean;
   connectWallet: () => Promise<string | null>;
@@ -18,6 +19,20 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({ children
   const [account, setAccount] = useState<string | null>(null);
   const [chainId, setChainId] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
+
+  const getNetworkName = (id: string | null) => {
+    if (!id) return 'Not Connected';
+    switch (id) {
+      case '1': return 'Ethereum Mainnet';
+      case '11155111': return 'Sepolia Testnet';
+      case '1337':
+      case '31337': return 'Hardhat Localhost';
+      case '137': return 'Polygon Mainnet';
+      case '80001':
+      case '80002': return 'Polygon Amoy';
+      default: return `Chain ID: ${id}`;
+    }
+  };
 
   // Check if wallet is already connected on mount
   useEffect(() => {
@@ -65,7 +80,9 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const connectWallet = async (): Promise<string | null> => {
     if (typeof window === 'undefined' || !(window as any).ethereum) {
-      alert('MetaMask is not installed. Please install MetaMask to use this DApp.');
+      if (confirm('MetaMask Extension is not detected in your browser.\n\nWould you like to open metamask.io to install it?')) {
+        window.open('https://metamask.io/download/', '_blank');
+      }
       return null;
     }
 
@@ -122,10 +139,9 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       return true;
     } catch (switchError: any) {
-      // This error code indicates that the chain has not been added to MetaMask.
       if (switchError.code === 4902) {
         try {
-          if (targetChainId === '11155111') { // Sepolia Testnet
+          if (targetChainId === '11155111') {
             await (window as any).ethereum.request({
               method: 'wallet_addEthereumChain',
               params: [
@@ -135,6 +151,19 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({ children
                   nativeCurrency: { name: 'Sepolia ETH', symbol: 'ETH', decimals: 18 },
                   rpcUrls: ['https://sepolia.infura.io/v3/'],
                   blockExplorerUrls: ['https://sepolia.etherscan.io'],
+                },
+              ],
+            });
+            return true;
+          } else if (targetChainId === '1337' || targetChainId === '31337') {
+            await (window as any).ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [
+                {
+                  chainId: hexChainId,
+                  chainName: 'Hardhat Localhost',
+                  nativeCurrency: { name: 'Local ETH', symbol: 'ETH', decimals: 18 },
+                  rpcUrls: ['http://127.0.0.1:8545'],
                 },
               ],
             });
@@ -154,6 +183,7 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         account,
         chainId,
+        networkName: getNetworkName(chainId),
         isConnected: !!account,
         isConnecting,
         connectWallet,
@@ -174,3 +204,4 @@ export const useWeb3 = () => {
   }
   return context;
 };
+
