@@ -4,7 +4,7 @@ import Futuristic3DCanvas from '../components/Futuristic3DCanvas';
 import HolographicIdBadge from '../components/HolographicIdBadge';
 import AIAnomalyRadar from '../components/AIAnomalyRadar';
 import DemoSwitcherModal from '../components/DemoSwitcherModal';
-import Card, { CardContent } from '../components/Card';
+import Card from '../components/Card';
 import Badge from '../components/Badge';
 import {
   ShieldAlert,
@@ -19,7 +19,9 @@ import {
   Fingerprint,
   ArrowRight,
   Vote,
-  Layers
+  Layers,
+  UserCheck,
+  FileCheck
 } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
@@ -28,11 +30,39 @@ export const LandingPage: React.FC = () => {
   const [activeDomainTab, setActiveDomainTab] = useState<'college' | 'company' | 'school' | 'civic'>('college');
   const [showDemoModal, setShowDemoModal] = useState(false);
 
-  const stats = [
-    { label: 'Immutable On-Chain Ballots', value: '45,892+' },
-    { label: 'Multi-Tenant Institutions', value: '184' },
-    { label: 'AI Anomaly Detection Rate', value: '99.98%' },
-    { label: 'Consensus Block Latency', value: '< 1.4s' }
+  const howItWorksSteps = [
+    {
+      step: '01',
+      title: 'Register Identity',
+      icon: UserCheck,
+      color: 'from-teal-500 to-emerald-600',
+      badgeVariant: 'teal' as const,
+      description: 'Voters register using verified institutional IDs (Student Roll No, Corporate Emp ID, School Admission No, or EPIC Voter ID).'
+    },
+    {
+      step: '02',
+      title: 'Verify Identity',
+      icon: Fingerprint,
+      color: 'from-purple-500 to-indigo-600',
+      badgeVariant: 'primary' as const,
+      description: 'Webcam facial liveness detection and 128-dimensional embedding verification prevent proxy voting attempts.'
+    },
+    {
+      step: '03',
+      title: 'Cast Vote On-Chain',
+      icon: Vote,
+      color: 'from-indigo-500 to-purple-600',
+      badgeVariant: 'info' as const,
+      description: 'Ballot selection is cryptographically signed and committed directly to an Ethereum smart contract ledger.'
+    },
+    {
+      step: '04',
+      title: 'Audit Result',
+      icon: FileCheck,
+      color: 'from-amber-500 to-rose-600',
+      badgeVariant: 'warning' as const,
+      description: 'Public zero-trust cryptographic audit trail with live Isolation Forest AI monitoring device telemetry and anomaly risks.'
+    }
   ];
 
   const domainFeatures = {
@@ -182,23 +212,20 @@ export const LandingPage: React.FC = () => {
           {/* Left Column: Headline & CTA */}
           <div className="lg:col-span-7 text-left space-y-5 animate-fade-in">
             <Badge variant="primary" icon={Sparkles}>
-              NEXT-GEN AI & BLOCKCHAIN VOTING INFRASTRUCTURE
+              CAPSTONE PROJECT // ACADEMIC EVALUATION DEMO
             </Badge>
 
             <div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.15]">
-                The Future of{' '}
+                Decentralized Voting System Powered by{' '}
                 <span className="bg-gradient-to-r from-teal-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-                  Secure Voting
+                  Smart Contracts & AI
                 </span>
               </h1>
-              <p className="text-base sm:text-lg lg:text-xl font-bold bg-gradient-to-r from-teal-300 via-indigo-200 to-purple-300 bg-clip-text text-transparent mt-2.5 tracking-tight">
-                Built with AI. Secured by Blockchain.
-              </p>
             </div>
 
-            <p className="body-base max-w-xl">
-              One unified platform for <strong className="text-teal-300">College Student Councils</strong>, <strong className="text-emerald-300">Corporate Workplace & Food Depts</strong>, <strong className="text-amber-300">School Prefects</strong>, and <strong className="text-purple-300">Civic Elections</strong>—powered by Ethereum smart contracts, real-time AI anomaly detection, and biometric face verification.
+            <p className="body-base max-w-xl text-slate-300 text-sm sm:text-base leading-relaxed">
+              SecureVoteAI is an auditable capstone voting framework integrating Ethereum smart contracts for immutable ballot recording with real-time Python AI anomaly detection and biometric facial verification.
             </p>
 
             <div className="flex flex-wrap gap-4 pt-2">
@@ -216,7 +243,7 @@ export const LandingPage: React.FC = () => {
                 className="bg-slate-900 border border-slate-700 hover:border-purple-500/50 hover:bg-slate-850 text-slate-200 font-bold px-6 py-3.5 rounded-xl transition active:scale-95 cursor-pointer flex items-center gap-2 text-sm shadow-md"
               >
                 <Sparkles className="h-4 w-4 text-purple-400" />
-                <span>Live Viva Demo</span>
+                <span>Launch Persona Switcher (Demo Mode)</span>
               </button>
             </div>
 
@@ -238,24 +265,61 @@ export const LandingPage: React.FC = () => {
               {/* Status footer bar inside canvas */}
               <div className="p-3 bg-slate-950/90 border border-slate-800 rounded-xl flex justify-between items-center text-[10px] font-mono text-slate-400">
                 <Badge variant="success" dot size="sm">
-                  SMART CONTRACT 0x7a3B... ONLINE
+                  SMART CONTRACT ONLINE
                 </Badge>
-                <span>ISOLATION FOREST RISK: 0.02</span>
+                <span>ISOLATION FOREST SENTINEL: ACTIVE</span>
               </div>
             </Card>
           </div>
         </div>
       </section>
 
-      {/* Metrics Row */}
-      <section className="bg-slate-900/40 border-y border-slate-800/80 py-10 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {stats.map((stat, idx) => (
-            <Card key={idx} interactive className="p-5 text-center">
-              <p className="text-2xl sm:text-3xl font-black text-white tracking-tight font-mono">{stat.value}</p>
-              <p className="text-[11px] font-semibold text-slate-400 mt-1 uppercase tracking-wider">{stat.label}</p>
-            </Card>
-          ))}
+      {/* How It Works Section (Honest Capstone Pipeline Framing) */}
+      <section className="bg-slate-900/40 border-y border-slate-800/80 py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <Badge variant="teal" icon={Sparkles} className="mb-3">
+              SYSTEM WORKFLOW
+            </Badge>
+            <h2 className="heading-lg">How It Works</h2>
+            <p className="body-base max-w-2xl mx-auto mt-2">
+              A 4-step cryptographic pipeline ensuring end-to-end voter authentication, smart contract immutability, and AI fraud monitoring.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+            {howItWorksSteps.map((stepItem, idx) => {
+              const Icon = stepItem.icon;
+              return (
+                <Card key={idx} interactive className="p-6 relative flex flex-col justify-between group">
+                  <div>
+                    <div className="flex justify-between items-center mb-4">
+                      <div className={`p-3 rounded-xl bg-gradient-to-br ${stepItem.color} text-white shadow-lg shrink-0`}>
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <span className="text-2xl font-black font-mono text-slate-700 group-hover:text-slate-500 transition-colors">
+                        {stepItem.step}
+                      </span>
+                    </div>
+                    <Badge variant={stepItem.badgeVariant} size="sm" className="mb-2">
+                      STEP {stepItem.step}
+                    </Badge>
+                    <h3 className="font-extrabold text-white text-lg mb-2">
+                      {stepItem.title}
+                    </h3>
+                    <p className="text-slate-400 text-xs leading-relaxed">
+                      {stepItem.description}
+                    </p>
+                  </div>
+                  {idx < howItWorksSteps.length - 1 && (
+                    <div className="hidden lg:block absolute -right-3 top-1/2 -translate-y-1/2 z-10 text-slate-700">
+                      <ArrowRight className="h-5 w-5" />
+                    </div>
+                  )}
+                </Card>
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -263,13 +327,13 @@ export const LandingPage: React.FC = () => {
       <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         <div className="text-center mb-12">
           <Badge variant="primary" icon={Layers} className="mb-3">
-            MULTI-TENANT ELECTORAL ADAPTATION
+            DEMO MODE // MULTI-TENANT SYSTEM
           </Badge>
           <h2 className="heading-lg">
-            Custom Tailored for Every Institution
+            Institutional Demo Mode
           </h2>
           <p className="body-base max-w-2xl mx-auto mt-2">
-            Experience how SecureVoteAI customizes identity models, ballots, and candidate profiles for each specific domain.
+            Simulated Demo Mode for Academic Evaluation — Switch between institutional personas to test how identity models, credential schemas, and ballot workflows adapt per domain.
           </p>
         </div>
 
@@ -326,7 +390,12 @@ export const LandingPage: React.FC = () => {
                 ))}
               </div>
 
-              <div className="pt-4 flex flex-wrap gap-4">
+              <div className="bg-purple-950/40 border border-purple-800/40 rounded-xl p-3 flex items-center gap-3 text-xs text-purple-200 font-mono">
+                <span className="bg-purple-600/40 text-purple-300 font-bold px-2 py-0.5 rounded text-[10px] tracking-wider uppercase border border-purple-500/30 shrink-0">DEMO MODE</span>
+                <span>Simulated persona switcher for evaluator testing.</span>
+              </div>
+
+              <div className="pt-2 flex flex-wrap gap-4">
                 <button
                   onClick={() => navigate('/register')}
                   className="bg-purple-600 hover:bg-purple-500 text-white text-xs sm:text-sm font-bold px-6 py-3 rounded-xl transition cursor-pointer shadow-md"
@@ -338,7 +407,7 @@ export const LandingPage: React.FC = () => {
                   className="bg-slate-950 border border-slate-800 hover:bg-slate-850 text-slate-300 text-xs sm:text-sm font-bold px-6 py-3 rounded-xl transition cursor-pointer flex items-center gap-2"
                 >
                   <Sparkles className="h-4 w-4 text-purple-400" />
-                  <span>Try Live Persona</span>
+                  <span>Launch Persona Switcher (Demo Mode)</span>
                 </button>
               </div>
             </div>

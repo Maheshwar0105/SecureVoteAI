@@ -67,7 +67,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout, onUserUpdate }) 
                   SecureVoteAI
                 </span>
                 <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest leading-none">
-                  Web3 & AI Multi-Tenant Matrix
+                  Web3 & AI Capstone System
                 </span>
               </div>
             </div>

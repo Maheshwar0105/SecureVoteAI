@@ -194,9 +194,12 @@ export const DemoSwitcherModal: React.FC<DemoSwitcherModalProps> = ({
               <Sparkles className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-xl font-extrabold tracking-tight text-white">Live Presentation Persona Switcher</h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Switch instantly between College, Corporate, School, Civic, and Admin roles.
+              <div className="flex items-center gap-2 mb-0.5">
+                <h2 className="text-xl font-extrabold tracking-tight text-white">Institutional Persona Switcher</h2>
+                <Badge variant="teal" size="sm">DEMO MODE</Badge>
+              </div>
+              <p className="text-xs text-slate-400">
+                Simulated persona switcher for evaluators: switch between College, Corporate, School, Civic, and Admin roles.
               </p>
             </div>
           </div>
