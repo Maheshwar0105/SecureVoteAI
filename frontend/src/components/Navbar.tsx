@@ -75,6 +75,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout, onUserUpdate }) 
             {/* Nav Items */}
             <div className="hidden lg:flex items-center gap-6">
               <Link to="/" className="text-slate-300 hover:text-white text-sm font-medium transition">Home</Link>
+              <Link to="/about" className="text-slate-300 hover:text-white text-sm font-medium transition">About Project</Link>
               {user && (
                 <>
                   <Link to="/dashboard" className="text-slate-300 hover:text-white text-sm font-medium transition">Voting Portal</Link>

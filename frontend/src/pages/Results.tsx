@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
+import { DashboardSkeleton } from '../components/Skeleton';
 import { Bar, Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -109,7 +110,11 @@ export const Results: React.FC = () => {
   };
 
   if (isLoading && elections.length === 0) {
-    return <div className="flex-1 flex justify-center items-center"><div className="h-8 w-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" /></div>;
+    return (
+      <div className="flex-1 bg-slate-950 text-slate-100 py-12 px-4 sm:px-6 lg:px-12 w-full max-w-7xl mx-auto">
+        <DashboardSkeleton />
+      </div>
+    );
   }
 
   return (
