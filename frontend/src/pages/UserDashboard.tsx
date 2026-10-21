@@ -1,20 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWeb3 } from '../context/Web3Context';
 import api from '../services/api';
 import HolographicIdBadge from '../components/HolographicIdBadge';
 import DemoSwitcherModal from '../components/DemoSwitcherModal';
-import VotingSelectionModal from '../components/VotingSelectionModal';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
+import { DashboardSkeleton, EmptyState, SkeletonCard } from '../components/Skeleton';
+import { useToast } from '../context/ToastContext';
 import {
   Vote,
   CheckCircle2,
-  Sparkles,
   ShieldCheck,
   Cpu,
   Database,
-  ChevronRight
+  ChevronRight,
+  AlertCircle,
+  CalendarX,
+  Clock,
+  BarChart2,
+  Lock,
 } from 'lucide-react';
 
 interface UserDashboardProps {
@@ -22,342 +27,199 @@ interface UserDashboardProps {
   onUserUpdate: (updatedUser: any) => void;
 }
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function computeStatus(el: any): 'upcoming' | 'active' | 'completed' {
+  return el.computedStatus || el.status || 'active';
+}
+
+function Countdown({ endTime }: { endTime: string }) {
+  const [diff, setDiff] = useState(Math.max(0, new Date(endTime).getTime() - Date.now()));
+  useEffect(() => {
+    const id = setInterval(() => setDiff(Math.max(0, new Date(endTime).getTime() - Date.now())), 1000);
+    return () => clearInterval(id);
+  }, [endTime]);
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  if (diff === 0) return <span style={{ color: 'var(--color-status-red)' }}>Closed</span>;
+  return <span style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--color-status-amber)' }}>{h}h {m}m {s}s</span>;
+}
+
+function ElectionStatusBadge({ status }: { status: string }) {
+  if (status === 'active') return <Badge variant="success" dot>Live</Badge>;
+  if (status === 'upcoming') return <Badge variant="warning" dot>Upcoming</Badge>;
+  return <Badge variant="neutral">Closed</Badge>;
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate }) => {
   const navigate = useNavigate();
-  const { account, connectWallet, signChallenge } = useWeb3();
+  const { connectWallet, signChallenge } = useWeb3();
+  const { addToast } = useToast();
 
   const [elections, setElections] = useState<any[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'college' | 'company' | 'school' | 'general'>('all');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [bindSuccess, setBindSuccess] = useState<string | null>(null);
   const [showDemoModal, setShowDemoModal] = useState(false);
-  const [showVotingSelectionModal, setShowVotingSelectionModal] = useState(false);
+  const [voteStatuses, setVoteStatuses] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    fetchDashboardData(selectedFilter);
-
-    const justLoggedIn = sessionStorage.getItem('justLoggedIn');
-    if (justLoggedIn) {
-      setShowVotingSelectionModal(true);
-      sessionStorage.removeItem('justLoggedIn');
-    }
-  }, [selectedFilter]);
-
-  const fetchDashboardData = async (filterType: string) => {
+  const fetchDashboardData = useCallback(async (filterType: string) => {
     setIsLoading(true);
+    setError(null);
     try {
       const url = filterType === 'all' ? '/elections' : `/elections?type=${filterType}`;
       const elRes = await api.get(url);
       setElections(elRes.data.elections);
+
+      // Check voted status for each active election
+      const token = localStorage.getItem('token');
+      if (token) {
+        const statusMap: Record<string, boolean> = {};
+        await Promise.allSettled(
+          elRes.data.elections
+            .filter((el: any) => computeStatus(el) === 'active')
+            .map(async (el: any) => {
+              try {
+                const res = await api.get(`/voting/check/${el._id}`);
+                statusMap[el._id] = res.data.hasVoted;
+              } catch {
+                statusMap[el._id] = false;
+              }
+            })
+        );
+        setVoteStatuses(statusMap);
+      }
     } catch (err: any) {
-      console.error(err);
-      setError('Failed to fetch dashboard data');
+      const msg = 'Unable to load elections. Check your network connection.';
+      setError(msg);
+      addToast(msg, 'error');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [addToast]);
+
+  useEffect(() => {
+    fetchDashboardData(selectedFilter);
+  }, [selectedFilter, fetchDashboardData]);
 
   const handleBindWallet = async () => {
     setError(null);
-    setBindSuccess(null);
-
     try {
       const address = await connectWallet();
       if (!address) return;
-
       const challengeRes = await api.get(`/auth/challenge?walletAddress=${address}`);
       const { challenge } = challengeRes.data;
-
       const signature = await signChallenge(challenge);
-      if (!signature) {
-        throw new Error('Signature cancelled');
-      }
-
-      const bindRes = await api.post('/auth/bind-wallet', {
-        walletAddress: address,
-        challenge,
-        signature
-      });
-
+      if (!signature) throw new Error('Signature cancelled');
+      const bindRes = await api.post('/auth/bind-wallet', { walletAddress: address, challenge, signature });
       const updatedUser = bindRes.data.user;
       localStorage.setItem('user', JSON.stringify(updatedUser));
       onUserUpdate(updatedUser);
-      setBindSuccess('Wallet address bound successfully!');
+      addToast('Wallet address bound successfully!', 'success');
     } catch (err: any) {
-      setError(err.response?.data?.error || err.message || 'Failed to bind wallet.');
+      const msg = err.response?.data?.error || err.message || 'Failed to bind wallet.';
+      setError(msg);
+      addToast(msg, 'error');
     }
   };
 
+  const goToElection = (el: any) => {
+    const slug = el.slug || el._id;
+    navigate(`/elections/${slug}`);
+  };
+
+  // ── Derived data ────────────────────────────────────────────────────────────
+  const activeCount = elections.filter((e) => computeStatus(e) === 'active').length;
+  const upcomingCount = elections.filter((e) => computeStatus(e) === 'upcoming').length;
+  const votedCount = Object.values(voteStatuses).filter(Boolean).length;
+
   return (
-    <div className="flex-1 bg-slate-950 text-slate-100 py-8 px-4 sm:px-6 lg:px-12 w-full max-w-full space-y-8">
-      
-      {/* Top Banner & Dashboard Headline */}
-      <Card className="p-6 sm:p-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-6 border-b border-slate-800">
+    <div
+      className="flex-1 py-8 px-4 sm:px-6 lg:px-12 w-full max-w-full space-y-8"
+      style={{ background: 'var(--color-bg)', color: 'var(--color-text-primary)' }}
+    >
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      <div
+        className="rounded-xl p-6 border"
+        style={{ background: 'var(--color-card-bg)', borderColor: 'var(--color-card-border)' }}
+      >
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Badge variant="success" dot size="sm">
-                AI-DRIVEN, BLOCKCHAIN-SECURED VOTING SUITE
-              </Badge>
-            </div>
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-white font-mono tracking-tight">
-              DASHBOARD: ENROLLED VOTER [{user?.name?.toUpperCase() || 'ANONYMOUS'}]
+            <Badge variant="success" dot size="sm" className="mb-2">Voter Portal Active</Badge>
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+              Welcome back, {user?.name?.split(' ')[0] || 'Voter'}
             </h1>
-            <p className="text-xs text-slate-400 mt-1 font-mono">
-              {user?.organizationName || 'SecureVote Global Network'} • {user?.department || 'Member'}
+            <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>
+              {user?.organizationName || 'SecureVote Network'} · {user?.department || 'Member'}
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => setShowVotingSelectionModal(true)}
-              className="bg-gradient-to-r from-teal-600 via-indigo-600 to-purple-600 hover:from-teal-500 hover:to-purple-500 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl transition cursor-pointer flex items-center gap-2 shadow-lg shadow-teal-500/20 active:scale-95 border border-teal-400/30"
-            >
-              <Vote className="h-4 w-4" />
-              <span>🎯 Select What & When To Vote</span>
-            </button>
-
-            <button
-              onClick={() => setShowDemoModal(true)}
-              className="bg-slate-900 border border-slate-700 hover:bg-slate-850 text-slate-300 text-xs font-bold px-4 py-2.5 rounded-xl transition cursor-pointer flex items-center gap-2 active:scale-95"
-            >
-              <Sparkles className="h-4 w-4 text-purple-400" />
-              <span>Switch Presentation Persona</span>
-            </button>
-          </div>
-        </div>
-
-        {/* 3-Column Core Dashboard HUD */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
-          
-          {/* Column 1: My Active Elections */}
-          <div className="md:col-span-4 bg-slate-950/80 border border-slate-800 rounded-xl p-5 flex flex-col justify-between shadow-inner">
-            <div>
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="font-extrabold text-white text-sm uppercase tracking-wider flex items-center gap-2">
-                  <Vote className="h-4 w-4 text-purple-400" /> My Active Elections
-                </h3>
-                <Badge variant="primary" size="sm">
-                  {elections.length} Open
-                </Badge>
-              </div>
-
-              {/* Elections List */}
-              <div className="space-y-2.5">
-                {elections.slice(0, 3).map((election) => (
-                  <div
-                    key={election._id}
-                    onClick={() => navigate(`/elections/${election._id}`)}
-                    className="p-3 bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 rounded-xl transition cursor-pointer flex justify-between items-center group"
-                  >
-                    <div>
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                        <span className="text-[9px] font-mono text-emerald-400 font-bold uppercase">Current Event</span>
-                      </div>
-                      <h4 className="text-xs font-bold text-white group-hover:text-emerald-300 transition line-clamp-1">
-                        {election.title}
-                      </h4>
-                      <p className="text-[10px] text-slate-400 font-mono line-clamp-1">
-                        {election.organizationName || 'Institution Ballot'}
-                      </p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-emerald-400 transition shrink-0 ml-2" />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* View All Button */}
-            <div className="pt-3 mt-3 border-t border-slate-800 flex justify-between items-center text-[10px] font-mono text-slate-400">
-              <span>LEDGER SYNC: REAL-TIME</span>
-              <button
-                onClick={() => setSelectedFilter('all')}
-                className="text-purple-400 hover:underline font-bold"
-              >
-                Refresh Feeds
-              </button>
-            </div>
-          </div>
-
-          {/* Column 2: Voter Profile & AI Anomaly Overview */}
-          <div className="md:col-span-4 space-y-4">
-            {/* Voter Profile Box */}
-            <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex items-center justify-between shadow-inner">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-extrabold text-lg shadow-md border border-purple-400/30">
-                    {user?.name ? user.name.charAt(0).toUpperCase() : 'V'}
-                  </div>
-                  <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-emerald-500 border-2 border-slate-950 flex items-center justify-center">
-                    <CheckCircle2 className="h-3 w-3 text-slate-950 stroke-[3]" />
-                  </span>
-                </div>
-                <div>
-                  <p className="text-[9px] font-mono text-slate-400 uppercase tracking-wider">Voter Profile</p>
-                  <h4 className="text-sm font-extrabold text-white">{user?.name || 'Registered Voter'}</h4>
-                  <p className="text-[10px] text-slate-400 font-mono truncate">{user?.organizationId || user?.email}</p>
-                </div>
-              </div>
-
-              <Badge variant="success" size="sm">
-                Verified
-              </Badge>
-            </div>
-
-            {/* AI Anomaly Overview Box */}
-            <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 shadow-inner space-y-3">
-              <div className="flex justify-between items-center">
-                <h4 className="text-xs font-mono font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5">
-                  <Cpu className="h-4 w-4 text-teal-400" /> AI ANOMALY OVERVIEW
-                </h4>
-                <span className="text-[9px] font-mono text-slate-400">ISOLATION FOREST</span>
-              </div>
-              <p className="text-[10px] text-slate-400 leading-relaxed">
-                Summary on system-wide real-time network health, bot pacing detection, and anti-proxy biometric constraints.
-              </p>
-
-              <div className="flex items-center justify-between bg-emerald-950/60 border border-emerald-500/40 p-2.5 rounded-xl">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                  <span className="text-xs font-mono font-bold text-emerald-300">
-                    SECURE LEDGER INTEGRITY: 100%
-                  </span>
-                </div>
-                <span className="text-[9px] font-mono text-emerald-400 font-bold">0.00 FRAUD</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Column 3: Vote History & Cryptographic Telemetry */}
-          <div className="md:col-span-4 bg-slate-950/80 border border-slate-800 rounded-xl p-5 flex flex-col justify-between shadow-inner">
-            <div>
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="font-extrabold text-white text-sm uppercase tracking-wider flex items-center gap-2">
-                  <Database className="h-4 w-4 text-indigo-400" /> Vote History
-                </h3>
-                <span className="text-[10px] font-mono text-slate-400 uppercase">IMMUTABLE COUNT</span>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 text-center mb-4">
-                <div className="p-2.5 bg-slate-900 border border-slate-800 rounded-xl">
-                  <p className="text-[9px] font-mono text-slate-400 uppercase">Vote Choices</p>
-                  <p className="text-lg font-black text-white font-mono mt-0.5">19</p>
-                </div>
-                <div className="p-2.5 bg-slate-900 border border-slate-800 rounded-xl">
-                  <p className="text-[9px] font-mono text-teal-400 uppercase">Anonymized</p>
-                  <p className="text-lg font-black text-teal-300 font-mono mt-0.5">2</p>
-                </div>
-                <div className="p-2.5 bg-slate-900 border border-slate-800 rounded-xl">
-                  <p className="text-[9px] font-mono text-purple-400 uppercase">Encrypted</p>
-                  <p className="text-lg font-black text-purple-300 font-mono mt-0.5">3</p>
-                </div>
-              </div>
-
-              <div className="space-y-1.5 text-[10px] font-mono text-slate-400">
-                <div className="flex items-center gap-2 text-slate-300">
-                  <span className="h-1.5 w-1.5 rounded-full bg-purple-400" />
-                  <span>Blockchain Smart Contract Verified</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-300">
-                  <span className="h-1.5 w-1.5 rounded-full bg-teal-400" />
-                  <span>AI Monitoring Engine Active (DeepScan)</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-300">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                  <span>Immutable Audit Trail Confirmed</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-3 mt-3 border-t border-slate-800 flex justify-between items-center text-[10px] font-mono">
-              <span className="text-slate-500">WALLET ADDRESS</span>
-              {user?.isWalletBound ? (
-                <span className="text-emerald-400 font-bold truncate max-w-[120px]">{user.walletAddress}</span>
-              ) : (
-                <button onClick={handleBindWallet} className="text-indigo-400 hover:underline font-bold">
-                  Bind MetaMask
-                </button>
-              )}
-            </div>
-          </div>
-
-        </div>
-
-        {/* Bottom Pipeline */}
-        <div className="mt-8 pt-8 border-t border-slate-800">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-            <div>
-              <Badge variant="teal" icon={ShieldCheck} className="mb-1">
-                DECENTRALIZED CONSENSUS PIPELINE
-              </Badge>
-              <h3 className="text-lg font-bold text-white">
-                Interactive Blockchain & Smart Contract Execution Table
-              </h3>
-              <p className="text-xs text-slate-400">
-                Visualizing live zero-knowledge ballot lifecycle from voter biometric handshake to Sepolia testnet confirmation.
-              </p>
-            </div>
-
-            <Badge variant="success" dot>
-              VOTE CONFIRMED ON LEDGER
-            </Badge>
-          </div>
-
-          <div className="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 shadow-2xl group">
-            <img 
-              src="/voter_holo_dash.png" 
-              alt="Holographic Voting Control Table" 
-              onError={(e) => {
-                const target = e.currentTarget;
-                target.onerror = null;
-                target.src = '/secure_voting_command.png';
-              }}
-              className="w-full h-auto object-cover rounded-2xl max-h-[380px] transition duration-500 group-hover:scale-101"
-            />
-            <div className="absolute bottom-4 left-4 right-4 bg-slate-950/90 border border-slate-800 p-4 rounded-xl backdrop-blur-md flex flex-wrap justify-between items-center gap-4 text-xs font-mono text-slate-300">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-                <span className="text-emerald-300 font-bold">SMART CONTRACT: VotingSystem.sol // 0x7a3B27CD...</span>
-              </div>
-              <div className="flex items-center gap-4 text-[11px] text-slate-400">
-                <span>CONSENSUS: 100% BYZANTINE TOLERANT</span>
-                <span>LATENCY: 14ms</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </Card>
-
-      {/* 3D Holographic Identity Pass Section */}
-      <Card className="p-6 sm:p-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <div>
-            <h3 className="text-lg font-extrabold text-white flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-purple-400" />
-              <span>Your Verified 3D Holographic Pass</span>
-            </h3>
-            <p className="text-xs text-slate-400 mt-0.5">Move your mouse over the card to inspect cryptographic micro-engraving.</p>
-          </div>
-
-          <div className="flex flex-wrap gap-1.5 bg-slate-950 border border-slate-800 p-1 rounded-xl">
+          {/* Stat pills */}
+          <div className="flex flex-wrap gap-3">
             {[
+              { icon: Vote, label: 'Live Elections', value: activeCount, color: 'var(--color-status-green)' },
+              { icon: Clock, label: 'Upcoming', value: upcomingCount, color: 'var(--color-status-amber)' },
+              { icon: CheckCircle2, label: 'Voted In', value: votedCount, color: 'var(--color-primary)' },
+            ].map(({ icon: Icon, label, value, color }) => (
+              <div
+                key={label}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg border text-sm"
+                style={{ background: 'var(--color-surface-alt)', borderColor: 'var(--color-border)' }}
+              >
+                <Icon className="h-4 w-4 shrink-0" style={{ color }} />
+                <span style={{ color: 'var(--color-text-muted)' }}>{label}:</span>
+                <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Error banner ───────────────────────────────────────────────────── */}
+      {error && (
+        <div
+          role="alert"
+          className="flex items-start gap-3 p-4 rounded-xl text-sm"
+          style={{
+            background: 'var(--color-status-red-bg)',
+            border: '1px solid rgba(220,38,38,0.3)',
+            color: 'var(--color-status-red)',
+          }}
+        >
+          <AlertCircle className="h-4.5 w-4.5 shrink-0 mt-0.5" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* ── Election List ───────────────────────────────────────────────────── */}
+      <div>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            Elections You're Eligible For
+          </h2>
+
+          {/* Filter tabs */}
+          <div
+            className="flex flex-wrap gap-1 p-1 rounded-lg border"
+            style={{ background: 'var(--color-surface-alt)', borderColor: 'var(--color-border)' }}
+          >
+            {([
               { id: 'all', label: 'All' },
               { id: 'college', label: 'College' },
               { id: 'company', label: 'Corporate' },
               { id: 'school', label: 'School' },
-              { id: 'general', label: 'Civic' }
-            ].map((tab) => (
+              { id: 'general', label: 'Civic' },
+            ] as const).map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setSelectedFilter(tab.id as any)}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-                  selectedFilter === tab.id
-                    ? 'bg-purple-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
-                }`}
+                id={`filter-${tab.id}`}
+                onClick={() => setSelectedFilter(tab.id)}
+                className="px-3 py-1 rounded-md text-sm font-medium transition cursor-pointer"
+                style={{
+                  background: selectedFilter === tab.id ? 'var(--color-primary)' : 'transparent',
+                  color: selectedFilter === tab.id ? '#ffffff' : 'var(--color-text-muted)',
+                }}
               >
                 {tab.label}
               </button>
@@ -365,8 +227,274 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
           </div>
         </div>
 
-        <HolographicIdBadge user={user} />
-      </Card>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <SkeletonCard /><SkeletonCard /><SkeletonCard />
+          </div>
+        ) : elections.length === 0 ? (
+          <EmptyState
+            icon={<CalendarX className="h-7 w-7" />}
+            title="No elections available"
+            description="There are no elections matching your filter right now. Check back later or contact your administrator."
+            action={
+              <button onClick={() => setSelectedFilter('all')} className="btn-secondary">
+                Show all elections
+              </button>
+            }
+          />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {elections.map((el) => {
+              const status = computeStatus(el);
+              const hasVoted = voteStatuses[el._id];
+              const slug = el.slug || el._id;
+
+              return (
+                <div
+                  key={el._id}
+                  id={`election-card-${el._id}`}
+                  className="rounded-xl border flex flex-col transition"
+                  style={{
+                    background: 'var(--color-card-bg)',
+                    borderColor: 'var(--color-card-border)',
+                    boxShadow: 'var(--color-card-shadow)',
+                  }}
+                >
+                  {/* Card header */}
+                  <div className="p-5 flex-1">
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <ElectionStatusBadge status={status} />
+                      {hasVoted && (
+                        <Badge variant="success" size="sm">
+                          <CheckCircle2 className="h-3 w-3 inline mr-1" />Vote Recorded
+                        </Badge>
+                      )}
+                    </div>
+
+                    <h3 className="text-base font-semibold leading-snug mb-1.5" style={{ color: 'var(--color-text-primary)' }}>
+                      {el.title}
+                    </h3>
+                    <p className="text-sm mb-3" style={{ color: 'var(--color-text-muted)' }}>
+                      {el.organizationName || 'Institution'}
+                    </p>
+
+                    {/* Positions */}
+                    {el.contestedPositions?.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {el.contestedPositions.slice(0, 3).map((pos: string) => (
+                          <span
+                            key={pos}
+                            className="text-xs px-2 py-0.5 rounded-md border"
+                            style={{
+                              background: 'var(--color-surface-alt)',
+                              borderColor: 'var(--color-border)',
+                              color: 'var(--color-text-muted)',
+                            }}
+                          >
+                            {pos}
+                          </span>
+                        ))}
+                        {el.contestedPositions.length > 3 && (
+                          <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                            +{el.contestedPositions.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Countdown for live elections */}
+                    {status === 'active' && (
+                      <div className="flex items-center gap-1.5 text-sm">
+                        <Clock className="h-3.5 w-3.5" style={{ color: 'var(--color-status-amber)' }} />
+                        <Countdown endTime={el.endTime} />
+                      </div>
+                    )}
+                    {status === 'upcoming' && (
+                      <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                        Opens {new Date(el.startTime).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </p>
+                    )}
+                    {status === 'completed' && (
+                      <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                        Ended {new Date(el.endTime).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Card footer — single action per card */}
+                  <div
+                    className="px-5 py-3 flex items-center justify-between"
+                    style={{ borderTop: '1px solid var(--color-border)' }}
+                  >
+                    {hasVoted ? (
+                      <button
+                        onClick={() => goToElection(el)}
+                        className="flex items-center gap-1.5 text-sm font-semibold cursor-pointer transition"
+                        style={{ color: 'var(--color-status-green)' }}
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                        View Receipt
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    ) : status === 'active' ? (
+                      <button
+                        id={`vote-btn-${el._id}`}
+                        onClick={() => goToElection(el)}
+                        className="btn-primary py-2 px-4 text-sm"
+                      >
+                        <Vote className="h-3.5 w-3.5" />
+                        Vote Now
+                      </button>
+                    ) : status === 'upcoming' ? (
+                      <button
+                        disabled
+                        className="flex items-center gap-1.5 text-sm font-medium cursor-not-allowed opacity-60"
+                        style={{ color: 'var(--color-text-muted)' }}
+                      >
+                        <Lock className="h-4 w-4" /> Not Yet Open
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => navigate('/results')}
+                        className="flex items-center gap-1.5 text-sm font-semibold cursor-pointer transition"
+                        style={{ color: 'var(--color-primary)' }}
+                      >
+                        <BarChart2 className="h-4 w-4" />
+                        View Results
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ── Profile + Security + Wallet Row ────────────────────────────────── */}
+      {!isLoading && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Voter profile */}
+          <div
+            className="rounded-xl border p-5 flex items-center gap-4"
+            style={{ background: 'var(--color-card-bg)', borderColor: 'var(--color-card-border)' }}
+          >
+            <div className="relative shrink-0">
+              <div
+                className="h-12 w-12 rounded-xl flex items-center justify-center text-white font-bold text-lg"
+                style={{ background: 'var(--color-primary)' }}
+              >
+                {user?.name?.charAt(0)?.toUpperCase() || 'V'}
+              </div>
+              <span
+                className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 flex items-center justify-center"
+                style={{ background: 'var(--color-status-green)', borderColor: 'var(--color-bg)' }}
+              >
+                <CheckCircle2 className="h-3 w-3 text-white stroke-[3]" />
+              </span>
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs mb-0.5" style={{ color: 'var(--color-text-muted)' }}>Voter Profile</p>
+              <h4 className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                {user?.name || 'Registered Voter'}
+              </h4>
+              <p className="text-xs truncate" style={{ color: 'var(--color-text-muted)' }}>
+                {user?.email}
+              </p>
+            </div>
+            <Badge variant="success" size="sm" className="shrink-0">Verified</Badge>
+          </div>
+
+          {/* AI Security */}
+          <div
+            className="rounded-xl border p-5 space-y-3"
+            style={{ background: 'var(--color-card-bg)', borderColor: 'var(--color-card-border)' }}
+          >
+            <div className="flex justify-between items-center">
+              <h4 className="text-sm font-semibold flex items-center gap-1.5" style={{ color: 'var(--color-text-primary)' }}>
+                <Cpu className="h-4 w-4" style={{ color: 'var(--color-primary)' }} />
+                AI Security
+              </h4>
+              <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Isolation Forest</span>
+            </div>
+            <div
+              className="flex items-center justify-between p-2.5 rounded-lg"
+              style={{ background: 'var(--color-status-green-bg)', border: '1px solid rgba(22,163,74,0.25)' }}
+            >
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4" style={{ color: 'var(--color-status-green)' }} />
+                <span className="text-sm font-semibold" style={{ color: 'var(--color-status-green)' }}>
+                  Ledger Integrity: 100%
+                </span>
+              </div>
+              <span className="text-xs font-semibold" style={{ color: 'var(--color-status-green)' }}>0 Fraud</span>
+            </div>
+          </div>
+
+          {/* Wallet / Vote stats */}
+          <div
+            className="rounded-xl border p-5"
+            style={{ background: 'var(--color-card-bg)', borderColor: 'var(--color-card-border)' }}
+          >
+            <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-3" style={{ color: 'var(--color-text-primary)' }}>
+              <Database className="h-4 w-4" style={{ color: 'var(--color-primary)' }} />
+              Vote Record
+            </h4>
+            <div className="space-y-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              {[
+                { dot: 'var(--color-primary)', text: 'Smart Contract Verified' },
+                { dot: 'var(--color-status-green)', text: 'AI Monitoring Active' },
+                { dot: 'var(--color-primary)', text: 'Immutable Audit Trail' },
+              ].map(({ dot, text }) => (
+                <div key={text} className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: dot }} />
+                  <span>{text}</span>
+                </div>
+              ))}
+            </div>
+            <div
+              className="mt-3 pt-3 flex justify-between items-center text-sm"
+              style={{ borderTop: '1px solid var(--color-border)' }}
+            >
+              <span style={{ color: 'var(--color-text-muted)' }}>Wallet</span>
+              {user?.isWalletBound ? (
+                <span className="font-semibold text-xs truncate max-w-[130px]" style={{ color: 'var(--color-status-green)' }}>
+                  {user.walletAddress}
+                </span>
+              ) : (
+                <button
+                  id="bind-wallet-btn"
+                  onClick={handleBindWallet}
+                  className="font-semibold cursor-pointer transition text-sm"
+                  style={{ color: 'var(--color-primary)' }}
+                >
+                  Bind MetaMask
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Holographic ID Pass ─────────────────────────────────────────────── */}
+      {!isLoading && (
+        <Card className="p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div>
+              <h3 className="text-lg font-semibold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+                <ShieldCheck className="h-5 w-5" style={{ color: 'var(--color-primary)' }} />
+                Your Verified Digital ID Pass
+              </h3>
+              <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+                Hover over the card to inspect cryptographic details.
+              </p>
+            </div>
+            <Badge variant="primary" size="sm">{user?.organizationType || 'voter'}</Badge>
+          </div>
+          <HolographicIdBadge user={user} />
+        </Card>
+      )}
 
       <DemoSwitcherModal
         isOpen={showDemoModal}
@@ -374,19 +502,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onUserUpdate
         onSelectPersona={(updatedUser) => {
           onUserUpdate(updatedUser);
           window.location.reload();
-        }}
-      />
-
-      <VotingSelectionModal
-        isOpen={showVotingSelectionModal}
-        onClose={() => setShowVotingSelectionModal(false)}
-        elections={elections}
-        onSelectSelection={(domain) => {
-          if (domain === 'civic') {
-            setSelectedFilter('general');
-          } else {
-            setSelectedFilter(domain as any);
-          }
         }}
       />
     </div>

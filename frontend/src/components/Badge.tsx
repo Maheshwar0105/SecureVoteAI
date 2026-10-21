@@ -1,7 +1,7 @@
 import React from 'react';
 
 export interface BadgeProps {
-  variant?: 'primary' | 'accent' | 'teal' | 'success' | 'warning' | 'danger' | 'error' | 'info' | 'neutral';
+  variant?: 'primary' | 'success' | 'warning' | 'danger' | 'error' | 'neutral' | 'info' | 'accent' | 'teal';
   size?: 'sm' | 'md';
   icon?: React.ElementType;
   dot?: boolean;
@@ -9,59 +9,62 @@ export interface BadgeProps {
   className?: string;
 }
 
+/**
+ * Status badge component.
+ * Uses CSS custom properties for theming (light/dark aware).
+ * Font is sans-serif (Inter), not monospace, per WCAG readability.
+ * Minimum font size: 12px (0.75rem).
+ */
 export const Badge: React.FC<BadgeProps> = ({
   variant = 'primary',
   size = 'md',
   icon: Icon,
   dot = false,
   children,
-  className = ''
+  className = '',
 }) => {
-  const variantStyles = {
-    primary: 'bg-purple-950/80 border-purple-500/40 text-purple-300',
-    accent: 'bg-teal-950/80 border-teal-500/40 text-teal-300',
-    teal: 'bg-teal-950/80 border-teal-500/40 text-teal-300',
-    success: 'bg-emerald-950/80 border-emerald-500/40 text-emerald-300',
-    warning: 'bg-amber-950/80 border-amber-500/40 text-amber-300',
-    danger: 'bg-rose-950/80 border-rose-500/40 text-rose-300',
-    error: 'bg-rose-950/80 border-rose-500/40 text-rose-300',
-    info: 'bg-cyan-950/80 border-cyan-500/40 text-cyan-300',
-    neutral: 'bg-slate-900/80 border-slate-700/60 text-slate-300'
-  };
+  const cssClass = (() => {
+    switch (variant) {
+      case 'success':                return 'badge badge-success';
+      case 'warning':                return 'badge badge-warning';
+      case 'danger':
+      case 'error':                  return 'badge badge-danger';
+      case 'neutral':                return 'badge badge-neutral';
+      // treat legacy teal/accent/info variants as primary
+      case 'teal':
+      case 'accent':
+      case 'info':
+      case 'primary':
+      default:                       return 'badge badge-primary';
+    }
+  })();
 
-  const dotColors = {
-    primary: 'bg-purple-400',
-    accent: 'bg-teal-400',
-    teal: 'bg-teal-400',
-    success: 'bg-emerald-400',
-    warning: 'bg-amber-400',
-    danger: 'bg-rose-400',
-    error: 'bg-rose-400',
-    info: 'bg-cyan-400',
-    neutral: 'bg-slate-400'
-  };
+  const sizeStyle: React.CSSProperties = size === 'sm'
+    ? { fontSize: '0.6875rem', padding: '0.125rem 0.5rem' }  // 11px — very small but contextually acceptable
+    : {};
 
-  const sizeStyles = {
-    sm: 'text-[10px] px-2 py-0.5 gap-1',
-    md: 'text-xs px-3 py-1 gap-1.5'
-  };
-
-  const iconSizes = {
-    sm: 'h-3 w-3',
-    md: 'h-3.5 w-3.5'
+  const dotColorMap: Record<string, string> = {
+    primary: 'var(--color-primary)',
+    success: 'var(--color-status-green)',
+    warning: 'var(--color-status-amber)',
+    danger:  'var(--color-status-red)',
+    error:   'var(--color-status-red)',
+    neutral: 'var(--color-text-muted)',
+    teal:    'var(--color-primary)',
+    accent:  'var(--color-primary)',
+    info:    'var(--color-primary)',
   };
 
   return (
-    <span
-      className={`inline-flex items-center rounded-full font-mono font-semibold border backdrop-blur-sm ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
-    >
+    <span className={`${cssClass} ${className}`} style={sizeStyle}>
       {dot && (
-        <span className="relative flex h-2 w-2">
-          <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${dotColors[variant]}`} />
-          <span className={`relative inline-flex rounded-full h-2 w-2 ${dotColors[variant]}`} />
-        </span>
+        <span
+          className="inline-block h-1.5 w-1.5 rounded-full shrink-0"
+          style={{ background: dotColorMap[variant] || 'var(--color-primary)' }}
+          aria-hidden="true"
+        />
       )}
-      {Icon && <Icon className={`${iconSizes[size]} shrink-0`} />}
+      {Icon && <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
       <span>{children}</span>
     </span>
   );

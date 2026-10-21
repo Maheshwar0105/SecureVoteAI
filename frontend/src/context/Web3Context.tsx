@@ -80,9 +80,8 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const connectWallet = async (): Promise<string | null> => {
     if (typeof window === 'undefined' || !(window as any).ethereum) {
-      if (confirm('MetaMask Extension is not detected in your browser.\n\nWould you like to open metamask.io to install it?')) {
-        window.open('https://metamask.io/download/', '_blank');
-      }
+      // Dispatch a custom event so any MetaMaskModal listener can open the modal
+      window.dispatchEvent(new CustomEvent('sva:metamask-missing'));
       return null;
     }
 

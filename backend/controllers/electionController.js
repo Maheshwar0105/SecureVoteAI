@@ -251,42 +251,73 @@ const seedDefaultElectionsIfEmpty = async () => {
   ]);
 };
 
-// Get All Elections (Supports Filtering by Domain Type)
+// Compute real-time status from dates (overrides stored status)
+function computeStatus(election) {
+  const now = new Date();
+  const start = new Date(election.startTime);
+  const end = new Date(election.endTime);
+  if (now < start) return 'upcoming';
+  if (now > end) return 'completed';
+  return 'active';
+}
+
+// Get All Elections (supports filtering, returns computed status)
 exports.getAllElections = async (req, res) => {
   const { type, department } = req.query;
 
   try {
-    // Check and seed if empty
     await seedDefaultElectionsIfEmpty().catch((err) => console.log('Seed check:', err.message));
 
     const filter = {};
-    if (type && type !== 'all') {
-      filter.electionType = type;
-    }
+    if (type && type !== 'all') filter.electionType = type;
     if (department && department !== 'All') {
       filter.eligibleDepartments = { $in: [department, 'All'] };
     }
 
     const elections = await Election.find(filter).sort({ startTime: -1 });
-    res.status(200).json({ elections });
+    const enriched = elections.map((el) => {
+      const obj = el.toObject();
+      obj.computedStatus = computeStatus(el);
+      // Ensure slug exists for older seed records
+      if (!obj.slug) {
+        const base = el.title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').slice(0, 80);
+        obj.slug = `${base}-${el._id.toString().slice(-6)}`;
+      }
+      return obj;
+    });
+    res.status(200).json({ elections: enriched });
   } catch (error) {
     console.error('Get elections error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
-// Get Single Election by ID
+// Get Single Election by ID or slug
 exports.getElectionById = async (req, res) => {
+  const { id } = req.params;
   try {
-    const election = await Election.findById(req.params.id);
+    // Try ObjectId first, fall back to slug
+    const mongoose = require('mongoose');
+    let election;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      election = await Election.findById(id);
+    }
+    if (!election) {
+      election = await Election.findOne({ slug: id });
+    }
     if (!election) {
       return res.status(404).json({ error: 'Election not found' });
     }
 
-    // Include candidates for this election
     const candidates = await Candidate.find({ electionId: election._id });
+    const obj = election.toObject();
+    obj.computedStatus = computeStatus(election);
+    if (!obj.slug) {
+      const base = election.title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').slice(0, 80);
+      obj.slug = `${base}-${election._id.toString().slice(-6)}`;
+    }
 
-    res.status(200).json({ election, candidates });
+    res.status(200).json({ election: obj, candidates });
   } catch (error) {
     console.error('Get election by ID error:', error);
     res.status(500).json({ error: 'Internal Server Error' });

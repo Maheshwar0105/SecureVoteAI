@@ -6,22 +6,22 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
+/**
+ * Base card component.
+ * Uses CSS custom properties for theme awareness.
+ * Interactive hover uses a subtle border highlight — no neon glow.
+ */
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ interactive = false, className = '', children, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={`bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-md transition-all duration-200 ${
-          interactive
-            ? 'cursor-pointer hover:border-purple-500/40 hover:shadow-purple-500/10 hover:bg-slate-900/90'
-            : ''
-        } ${className}`}
-        {...props}
-      >
-        {children}
-      </div>
-    );
-  }
+  ({ interactive = false, className = '', children, style, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={`sva-card ${interactive ? 'sva-card-interactive cursor-pointer' : ''} ${className}`}
+      style={style}
+      {...props}
+    >
+      {children}
+    </div>
+  )
 );
 Card.displayName = 'Card';
 
@@ -40,7 +40,11 @@ export const CardTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({
   children,
   ...props
 }) => (
-  <h3 className={`text-lg font-extrabold text-white tracking-tight ${className}`} {...props}>
+  <h3
+    className={`text-lg font-semibold ${className}`}
+    style={{ color: 'var(--color-text-primary)' }}
+    {...props}
+  >
     {children}
   </h3>
 );
@@ -50,7 +54,11 @@ export const CardDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement
   children,
   ...props
 }) => (
-  <p className={`text-xs text-slate-400 leading-relaxed ${className}`} {...props}>
+  <p
+    className={`text-sm leading-relaxed ${className}`}
+    style={{ color: 'var(--color-text-muted)' }}
+    {...props}
+  >
     {children}
   </p>
 );
@@ -70,7 +78,11 @@ export const CardFooter: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   children,
   ...props
 }) => (
-  <div className={`mt-4 pt-4 border-t border-slate-800/80 flex items-center justify-between ${className}`} {...props}>
+  <div
+    className={`mt-4 pt-4 flex items-center justify-between ${className}`}
+    style={{ borderTop: '1px solid var(--color-border)' }}
+    {...props}
+  >
     {children}
   </div>
 );

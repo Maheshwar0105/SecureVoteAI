@@ -1,9 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWeb3 } from '../context/Web3Context';
+import { useTheme } from '../context/ThemeContext';
 import DemoSwitcherModal from './DemoSwitcherModal';
-import Badge from './Badge';
-import { ShieldCheck, LogOut, Wallet, Sparkles, GraduationCap, Briefcase, School, Building, Cpu } from 'lucide-react';
+import MetaMaskModal from './MetaMaskModal';
+import {
+  ShieldCheck,
+  LogOut,
+  Wallet,
+  Sun,
+  Moon,
+  Cpu,
+  ChevronDown,
+} from 'lucide-react';
 
 interface NavbarProps {
   user: any;
@@ -13,133 +22,223 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ user, onLogout, onUserUpdate }) => {
   const { account, connectWallet, isConnecting, networkName } = useWeb3();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+
   const [showDemoModal, setShowDemoModal] = useState(false);
+  const [showMetaMaskModal, setShowMetaMaskModal] = useState(false);
+
+  // Listen to the custom event dispatched by Web3Context when MetaMask is missing
+  useEffect(() => {
+    const handler = () => setShowMetaMaskModal(true);
+    window.addEventListener('sva:metamask-missing', handler);
+    return () => window.removeEventListener('sva:metamask-missing', handler);
+  }, []);
 
   const handleWalletConnect = async () => {
+    if (typeof window === 'undefined' || !(window as any).ethereum) {
+      setShowMetaMaskModal(true);
+      return;
+    }
     await connectWallet();
   };
 
-  const getDomainBadge = () => {
-    if (!user) return null;
-    const type = user.organizationType || 'general';
-    switch (type) {
-      case 'college':
-        return (
-          <Badge variant="info" icon={GraduationCap} className="hidden sm:inline-flex">
-            College ID
-          </Badge>
-        );
-      case 'company':
-        return (
-          <Badge variant="success" icon={Briefcase} className="hidden sm:inline-flex">
-            Corporate Pass
-          </Badge>
-        );
-      case 'school':
-        return (
-          <Badge variant="warning" icon={School} className="hidden sm:inline-flex">
-            School Prefect
-          </Badge>
-        );
-      default:
-        return (
-          <Badge variant="primary" icon={Building} className="hidden sm:inline-flex">
-            Civic Voter
-          </Badge>
-        );
-    }
+  const navLinkStyle = {
+    color: 'var(--color-text-secondary)',
+    fontSize: '0.9375rem',
+    fontWeight: '500',
+    textDecoration: 'none',
+    transition: 'color 0.15s ease',
   };
 
   return (
     <>
-      <nav className="border-b border-slate-800 bg-slate-900/85 backdrop-blur-lg sticky top-0 z-40" dir="ltr">
+      <nav
+        className="sticky top-0 z-40 border-b"
+        style={{
+          background: 'var(--color-nav-bg)',
+          borderColor: 'var(--color-nav-border)',
+          backdropFilter: 'blur(12px)',
+        }}
+        aria-label="Main navigation"
+      >
         <div className="w-full px-4 sm:px-6 lg:px-12">
-          <div className="flex justify-between h-16 items-center">
-            {/* Logo */}
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-              <div className="relative flex items-center justify-center">
-                <ShieldCheck className="h-8 w-8 text-purple-400 animate-pulse" />
-                <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-teal-400" />
+          <div className="flex justify-between h-16 items-center gap-4">
+
+            {/* ── Logo ── */}
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
+              aria-label="Go to home page"
+            >
+              <div
+                className="flex items-center justify-center h-8 w-8 rounded-lg"
+                style={{ background: 'var(--color-primary)' }}
+              >
+                <ShieldCheck className="h-4.5 w-4.5 text-white" />
               </div>
-              <div className="flex flex-col">
-                <span className="font-extrabold text-xl tracking-wider bg-gradient-to-r from-purple-400 via-indigo-300 to-teal-400 bg-clip-text text-transparent">
+              <div className="flex flex-col leading-tight">
+                <span
+                  className="font-bold text-base tracking-tight"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
                   SecureVoteAI
                 </span>
-                <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest leading-none">
-                  Web3 & AI Capstone System
+                <span
+                  className="text-xs hidden sm:block"
+                  style={{ color: 'var(--color-text-muted)', fontSize: '0.7rem' }}
+                >
+                  Blockchain · AI · Biometrics
                 </span>
               </div>
-            </div>
+            </button>
 
-            {/* Nav Items */}
-            <div className="hidden lg:flex items-center gap-6">
-              <Link to="/" className="text-slate-300 hover:text-white text-sm font-medium transition">Home</Link>
-              <Link to="/about" className="text-slate-300 hover:text-white text-sm font-medium transition">About Project</Link>
-              {user && (
-                <>
-                  <Link to="/dashboard" className="text-slate-300 hover:text-white text-sm font-medium transition">Voting Portal</Link>
-                  <Link to="/results" className="text-slate-300 hover:text-white text-sm font-medium transition">Audit Results</Link>
-                  {user.role === 'admin' && (
-                    <Link to="/admin" className="text-purple-400 hover:text-purple-300 text-sm font-semibold transition flex items-center gap-1">
-                      <Cpu className="h-4 w-4" /> Admin Console
-                    </Link>
-                  )}
-                </>
+            {/* ── Centre nav links ── */}
+            <div className="hidden lg:flex items-center gap-1">
+              {[
+                { to: '/', label: 'Home' },
+                { to: '/about', label: 'About' },
+                ...(user ? [
+                  { to: '/dashboard', label: 'Voting Portal' },
+                  { to: '/results', label: 'Audit Results' },
+                ] : []),
+              ].map(({ to, label }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  className="px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                  style={navLinkStyle}
+                  onMouseOver={(e) => (e.currentTarget.style.color = 'var(--color-text-primary)')}
+                  onMouseOut={(e) => (e.currentTarget.style.color = 'var(--color-text-secondary)')}
+                >
+                  {label}
+                </Link>
+              ))}
+              {user?.role === 'admin' && (
+                <Link
+                  to="/admin"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors"
+                  style={{ color: 'var(--color-primary)' }}
+                >
+                  <Cpu className="h-3.5 w-3.5" />
+                  Admin Console
+                </Link>
               )}
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-3">
-              {/* Quick Persona Switcher for Presentation */}
+            {/* ── Right actions ── */}
+            <div className="flex items-center gap-2 sm:gap-3">
+
+              {/* Theme toggle */}
               <button
-                onClick={() => setShowDemoModal(true)}
-                className="flex items-center gap-1.5 bg-purple-950/60 hover:bg-purple-900/60 border border-purple-500/40 text-purple-300 px-3 py-1.5 rounded-full text-xs font-bold font-mono transition shadow-sm cursor-pointer"
-                title="Switch College, Corporate, School, or Civic role"
+                id="theme-toggle-btn"
+                onClick={toggleTheme}
+                className="flex items-center justify-center h-9 w-9 rounded-lg border transition cursor-pointer"
+                style={{
+                  background: 'transparent',
+                  borderColor: 'var(--color-border)',
+                  color: 'var(--color-text-muted)',
+                }}
+                aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+                title={theme === 'dark' ? 'Light theme' : 'Dark theme'}
               >
-                <Sparkles className="h-3.5 w-3.5 text-purple-400 animate-spin" />
-                <span>Demo Switcher</span>
+                {theme === 'dark'
+                  ? <Sun className="h-4 w-4" />
+                  : <Moon className="h-4 w-4" />
+                }
               </button>
 
-              {getDomainBadge()}
+              {/* Demo switcher */}
+              <button
+                id="navbar-demo-switcher-btn"
+                onClick={() => setShowDemoModal(true)}
+                className="hidden sm:flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg border cursor-pointer transition"
+                style={{
+                  color: 'var(--color-text-muted)',
+                  borderColor: 'var(--color-border)',
+                  background: 'transparent',
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = 'var(--color-primary-light)';
+                  e.currentTarget.style.borderColor = 'var(--color-primary)';
+                  e.currentTarget.style.color = 'var(--color-primary)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.borderColor = 'var(--color-border)';
+                  e.currentTarget.style.color = 'var(--color-text-muted)';
+                }}
+                title="Switch demo persona"
+              >
+                Demo
+                <ChevronDown className="h-3.5 w-3.5" />
+              </button>
 
-              {/* MetaMask Connection Button */}
+              {/* MetaMask connection */}
               {account ? (
-                <Badge variant="primary" dot className="font-mono">
-                  {account.slice(0, 6)}...{account.slice(-4)} {networkName && `(${networkName})`}
-                </Badge>
+                <span
+                  className="badge badge-success hidden sm:inline-flex"
+                  title={`${account} on ${networkName}`}
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-status-green)]" />
+                  {account.slice(0, 6)}…{account.slice(-4)}
+                </span>
               ) : (
                 <button
+                  id="navbar-connect-wallet-btn"
                   onClick={handleWalletConnect}
                   disabled={isConnecting}
-                  className="hidden sm:flex items-center gap-2 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-200 px-3.5 py-1.5 rounded-full text-xs font-semibold font-mono transition active:scale-95 cursor-pointer"
+                  className="hidden sm:flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg border cursor-pointer transition"
+                  style={{
+                    color: 'var(--color-text-secondary)',
+                    borderColor: 'var(--color-border)',
+                    background: 'transparent',
+                  }}
                 >
-                  <Wallet className="h-3.5 w-3.5 text-teal-400" />
-                  {isConnecting ? 'Connecting...' : 'Connect MetaMask'}
+                  <Wallet className="h-3.5 w-3.5" />
+                  {isConnecting ? 'Connecting…' : 'Connect Wallet'}
                 </button>
               )}
 
-              {/* Profile & Logout */}
+              {/* User / Sign in */}
               {user ? (
                 <div className="flex items-center gap-2">
                   <div className="text-right hidden sm:block">
-                    <p className="text-xs font-bold text-white leading-tight">
+                    <p className="text-sm font-semibold leading-tight" style={{ color: 'var(--color-text-primary)' }}>
                       {user?.name ? user.name.split(' ')[0] : 'Voter'}
                     </p>
-                    <p className="text-[10px] text-slate-400 font-mono capitalize">{user.role}</p>
+                    <p className="capitalize" style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>
+                      {user.role}
+                    </p>
                   </div>
                   <button
+                    id="logout-btn"
                     onClick={onLogout}
-                    className="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800/60 rounded-full transition cursor-pointer"
-                    title="Logout"
+                    className="flex items-center justify-center h-9 w-9 rounded-lg border transition cursor-pointer"
+                    style={{
+                      borderColor: 'var(--color-border)',
+                      color: 'var(--color-text-muted)',
+                      background: 'transparent',
+                    }}
+                    title="Sign out"
+                    aria-label="Sign out"
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.color = 'var(--color-status-red)';
+                      e.currentTarget.style.borderColor = 'var(--color-status-red)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.color = 'var(--color-text-muted)';
+                      e.currentTarget.style.borderColor = 'var(--color-border)';
+                    }}
                   >
-                    <LogOut className="h-4.5 w-4.5" />
+                    <LogOut className="h-4 w-4" />
                   </button>
                 </div>
               ) : (
                 <button
+                  id="signin-btn"
                   onClick={() => navigate('/login')}
-                  className="bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs px-4 py-2 rounded-xl transition cursor-pointer shadow-md shadow-purple-500/20"
+                  className="btn-primary py-2 px-4 text-sm"
                 >
                   Sign In
                 </button>
@@ -156,6 +255,11 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout, onUserUpdate }) 
           if (onUserUpdate) onUserUpdate(updatedUser);
           window.location.reload();
         }}
+      />
+
+      <MetaMaskModal
+        isOpen={showMetaMaskModal}
+        onClose={() => setShowMetaMaskModal(false)}
       />
     </>
   );

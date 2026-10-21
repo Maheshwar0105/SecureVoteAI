@@ -1,5 +1,15 @@
 const mongoose = require('mongoose');
 
+// Generate URL-safe slug from title
+function makeSlug(title) {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 80);
+}
+
 const ElectionSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -72,6 +82,16 @@ const ElectionSchema = new mongoose.Schema({
     type: [String],
     default: []
   },
+  totalVotes: {
+    type: Number,
+    default: 0
+  },
+  slug: {
+    type: String,
+    trim: true,
+    lowercase: true,
+    index: true
+  },
   isDeleted: {
     type: Boolean,
     default: false
@@ -87,6 +107,17 @@ const ElectionSchema = new mongoose.Schema({
 // Indexes
 ElectionSchema.index({ status: 1 });
 ElectionSchema.index({ startTime: 1, endTime: 1 });
+ElectionSchema.index({ slug: 1 });
+
+// Auto-generate slug before save
+ElectionSchema.pre('save', function(next) {
+  if (this.isNew || this.isModified('title')) {
+    const base = makeSlug(this.title);
+    const suffix = this._id.toString().slice(-6);
+    this.slug = `${base}-${suffix}`;
+  }
+  next();
+});
 
 // Soft Delete Middleware
 ElectionSchema.pre('find', function() {

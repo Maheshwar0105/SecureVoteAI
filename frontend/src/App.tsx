@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Web3Provider } from './context/Web3Context';
+import { ThemeProvider } from './context/ThemeContext';
+import { ToastProvider } from './context/ToastContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import LandingPage from './pages/LandingPage';
@@ -19,18 +21,17 @@ const PageTitleUpdater = () => {
 
   useEffect(() => {
     const titles: Record<string, string> = {
-      '/': 'SecureVoteAI - Decoupled Smart Contract & AI Voting System',
-      '/about': 'Architecture & Tech Stack - SecureVoteAI Capstone',
-      '/login': 'Voter Sign In - SecureVoteAI',
-      '/register': 'Voter Registration - SecureVoteAI',
-      '/verify-otp': 'OTP Verification - SecureVoteAI',
-      '/dashboard': 'Voting Portal & Dashboard - SecureVoteAI',
-      '/admin': 'Chief Election Commission Admin Console - SecureVoteAI',
-      '/results': 'Live Audit Results & Ledger Logs - SecureVoteAI'
+      '/': 'SecureVoteAI — Blockchain & AI Voting System',
+      '/about': 'Architecture & Tech Stack — SecureVoteAI',
+      '/login': 'Sign In — SecureVoteAI',
+      '/register': 'Register — SecureVoteAI',
+      '/verify-otp': 'Verify OTP — SecureVoteAI',
+      '/dashboard': 'Voting Portal — SecureVoteAI',
+      '/admin': 'Admin Console — SecureVoteAI',
+      '/results': 'Audit Results — SecureVoteAI',
     };
 
-    const title = titles[location.pathname] || 'SecureVoteAI - Decoupled Smart Contract & AI Voting System';
-    document.title = title;
+    document.title = titles[location.pathname] ?? 'SecureVoteAI — Blockchain & AI Voting System';
   }, [location]);
 
   return null;
@@ -42,7 +43,11 @@ function App() {
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch {
+        localStorage.removeItem('user');
+      }
     }
   }, []);
 
@@ -53,39 +58,47 @@ function App() {
   };
 
   return (
-    <Web3Provider>
-      <Router>
-        <PageTitleUpdater />
-        <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
-          <Navbar user={user} onLogout={handleLogout} onUserUpdate={(u) => setUser(u)} />
-          
-          <main className="flex-1 flex flex-col">
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/login" element={<Login onLoginSuccess={(u) => setUser(u)} />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/verify-otp" element={<VerifyOTP onLoginSuccess={(u) => setUser(u)} />} />
-              
-              <Route 
-                path="/dashboard" 
-                element={user ? <UserDashboard user={user} onUserUpdate={(u) => setUser(u)} /> : <Navigate to="/login" />} 
-              />
-              <Route 
-                path="/admin" 
-                element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/login" />} 
-              />
-              
-              <Route path="/elections/:id" element={<ElectionDetails />} />
-              <Route path="/results" element={<Results />} />
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-          </main>
+    <ThemeProvider>
+      <ToastProvider>
+        <Web3Provider>
+          <Router>
+            <PageTitleUpdater />
+            {/* Root div picks up --color-bg from CSS custom properties */}
+            <div
+              className="min-h-screen flex flex-col font-sans"
+              style={{ background: 'var(--color-bg)', color: 'var(--color-text-primary)' }}
+            >
+              <Navbar user={user} onLogout={handleLogout} onUserUpdate={(u) => setUser(u)} />
 
-          <Footer />
-        </div>
-      </Router>
-    </Web3Provider>
+              <main className="flex-1 flex flex-col">
+                <Routes>
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/login" element={<Login onLoginSuccess={(u) => setUser(u)} />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/verify-otp" element={<VerifyOTP onLoginSuccess={(u) => setUser(u)} />} />
+
+                  <Route
+                    path="/dashboard"
+                    element={user ? <UserDashboard user={user} onUserUpdate={(u) => setUser(u)} /> : <Navigate to="/login" replace />}
+                  />
+                  <Route
+                    path="/admin"
+                    element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/login" replace />}
+                  />
+
+                  <Route path="/elections/:slug" element={<ElectionDetails />} />
+                  <Route path="/results" element={<Results />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </main>
+
+              <Footer />
+            </div>
+          </Router>
+        </Web3Provider>
+      </ToastProvider>
+    </ThemeProvider>
   );
 }
 
